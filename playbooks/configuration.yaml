@@ -1,0 +1,19 @@
+# Homer configuration
+services:
+  - name: Example
+    icon: https://raw.githubusercontent.com/bastienwirtz/homer/main/public/logo.png
+    subtitle: "My Service"
+    url: "http://example.com"
+    target: "_blank"
+
+services_second_window:
+  - name: Example 2
+    icon: https://raw.githubusercontent.com/bastienwirtz/homer/main/public/logo.png
+    subtitle: "My Second Service"
+    url: "http://example2.com"
+    target: "_blank"
+  - name: Example
+    icon: https://raw.githubusercontent.com/bastienwirtz/homer/main/public/logo.png
+    subtitle: "My Service"
+    url: "http://example.com"
+    target: "_blank"

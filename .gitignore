@@ -1,0 +1,9 @@
+# keys hygiene
+*.key
+*.pem
+id_*
+*_private
+*.ppk
+
+# MacOS
+.DS_Store

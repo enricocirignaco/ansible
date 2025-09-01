@@ -1,0 +1,103 @@
+---
+# ansible-playbook -i inventory/hosts.ini playbooks/bootstrap.yaml --limit bootstrap --ask-pass --ask-become-pass
+- name: Bootstrap Debian-based systems for Ansible management
+  hosts: bootstrap
+  become: true # sudo
+  gather_facts: false
+
+  pre_tasks:
+    - name: Ensure Python 3 exists
+      raw: test -e /usr/bin/python3 || (apt update -y && apt install -y python3)
+      changed_when: false
+
+    - name: Gather facts now that Python is present
+      setup:
+
+    - name: Read local public key (from control machine)
+      set_fact:
+        admin_pubkey: "{{ lookup('file', admin_pubkey_path, errors='ignore') | default('', true) }}"
+
+    - name: Assert we actually loaded a public key
+      assert:
+        that:
+          - admin_pubkey | length > 30
+        fail_msg: >-
+          Could not read your public key from {{ admin_pubkey_path }}. Place your pubkey in files/keys. 
+
+  tasks:
+    - name: Create dedicated admin user
+      user:
+        name: "{{ admin_user }}"
+        shell: /bin/bash
+        groups: "{{ admin_groups | join(',') }}"
+        append: true   # Append user to groups without removing from others
+        create_home: true
+        state: present
+
+    - name: Install authorized_keys
+      authorized_key:
+        user: "{{ admin_user }}"
+        key: "{{ admin_pubkey }}"
+        state: present
+        manage_dir: true # Ensure .ssh directory is present
+
+    - name: Enforce authorized_keys permissions
+      file:
+        path: "/home/{{ admin_user }}/.ssh/authorized_keys"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+        mode: "0600"
+        state: file
+
+    - name: Optionally grant passwordless sudo (drop-in)
+      copy:
+        dest: "/etc/sudoers.d/010-{{ admin_user }}-nopasswd"
+        content: "{{ admin_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        owner: root
+        group: root
+        mode: "0440"  # Read-only for owner and group; required for sudoers files
+      when: enable_nopasswd_sudo
+
+    - name: Optionally set timezone
+      when: set_timezone is string
+      timezone:
+        name: "{{ set_timezone }}"
+
+    - name: Verify SSH login as admin user
+      vars:
+        # Override connection user for this block to test the new account directly
+        ansible_user: "{{ admin_user }}"
+      become: false
+      block:
+        - name: Reset SSH connection to pick up new user
+          meta: reset_connection
+
+        - name: Wait for connection as {{ admin_user }}
+          wait_for_connection:
+            timeout: 30
+
+        - name: Verify the effective remote user is the admin user
+          command: whoami
+          register: whoami_out
+          changed_when: false
+
+        - name: Assert we are logged in as the admin user
+          assert:
+            that:
+              - whoami_out.stdout == admin_user
+            fail_msg: "Re-login as {{ admin_user }} failed — not creating completion marker."
+
+    - name: Mark bootstrap completion
+      file:
+        path: /var/local/bootstrap.done
+        state: touch
+        owner: root
+        group: root
+        mode: "0644"
+
+  post_tasks:
+    - name: Display success message
+      debug:
+        msg: |
+          Bootstrap successful. You can now login as '{{ admin_user }}' on {{ inventory_hostname }}.
+          Example: ssh -i <your-private-key> {{ admin_user }}@{{ ansible_host }}

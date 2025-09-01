@@ -1,0 +1,6 @@
+# group_vars/bootstrap.yaml
+admin_user: ansible
+admin_groups: ["sudo"]
+admin_pubkey_path: "{{ playbook_dir }}/../keys/id_home_lab_production_ansible.pub"
+enable_nopasswd_sudo: true
+set_timezone: "Europe/Zurich"     # set to false to skip
