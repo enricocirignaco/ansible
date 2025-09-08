@@ -58,11 +58,6 @@
         mode: "0440"  # Read-only for owner and group; required for sudoers files
       when: enable_nopasswd_sudo
 
-    - name: Optionally set timezone
-      when: set_timezone is string
-      timezone:
-        name: "{{ set_timezone }}"
-
     - name: Verify SSH login as admin user
       vars:
         # Override connection user for this block to test the new account directly
