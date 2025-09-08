@@ -1,5 +1,0 @@
-- hosts: over_jump_host
-  gather_facts: no
-  tasks:
-    - name: Say hello
-      command: echo "Hello from Ansible on {{ inventory_hostname }}"
