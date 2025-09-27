@@ -1,0 +1,6 @@
+---
+- name: Apply baseline configuration to a new Raspberry Pi server after bootstrap
+  hosts: managed
+  become: true
+  roles:
+    - common
