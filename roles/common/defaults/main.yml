@@ -1,3 +1,11 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/common
+timezone: Europe/Zurich
+common_base_packages:
+  - nano
+  - curl
+  - htop
+  - git
+  - sudo
+  

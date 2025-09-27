@@ -1,3 +1,47 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/common
+
+- name: Ensure timezone is set
+  ansible.builtin.timezone:
+    name: "{{ timezone }}"
+  tags: [timezone, common]
+
+- name: Optionally set hostname
+  ansible.builtin.hostname:
+    name: "{{ hostname }}"
+  when: hostname is defined and hostname != ""
+  tags: [hostname, common]
+
+- name: Ensure system time sync service is enabled and running (systemd-timesyncd)
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    enabled: true
+    state: started
+  tags: [timesync, common]
+
+- name: Ensure cron is enabled and running
+  ansible.builtin.systemd:
+    name: cron
+    enabled: true
+    state: started
+  tags: [cron, common]
+
+- name: Perform packages upgrade
+  ansible.builtin.apt:
+    upgrade: yes
+  tags: [upgrade, common]
+- name: Ensure base packages are installed
+  ansible.builtin.apt:
+    name: "{{ common_base_packages }}"
+    state: present
+    update_cache: true
+  tags: [packages, common]
+- name: Autoremove unused packages
+  ansible.builtin.apt:
+    autoremove: true
+  tags: [upgrade, common, clean]
+- name: Autoclean apt cache
+  ansible.builtin.apt:
+    autoclean: true
+  tags: [upgrade, common, clean]

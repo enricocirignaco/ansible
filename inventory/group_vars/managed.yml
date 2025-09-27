@@ -1,8 +1,3 @@
 # group_vars/managed.yml
 user: ansible
-timezone: Europe/Zurich
-common_base_packages:
-  - nano
-  - curl
-  - htop
-  - git
+admin_user: pi
