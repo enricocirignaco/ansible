@@ -1,0 +1,7 @@
+---
+- name: Day-2 baseline — test common role
+  hosts: managed
+  become: true
+  gather_facts: true
+  roles:
+    - common
