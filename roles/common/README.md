@@ -1,38 +1,54 @@
-Role Name
-=========
+Common Role
+===========
 
-A brief description of the role goes here.
+This role provides a baseline configuration for all managed Debian-based hosts in the homelab.  
+It ensures system identity, base packages, safe upgrades and essential system services.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Ansible 2.14+
+- Collections:
+  - `community.general` (for locale management)
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Variables can be set in `defaults/main.yml`, overridden in `group_vars/` or `host_vars/`.
+
+- `common_base_packages`: List of baseline packages to install.  
+  *Default*: `['nano', 'curl', 'htop', 'git', 'sudo']`
+
+- `timezone`: Timezone string to apply.  
+  *Default*: `Europe/Zurich`
+
+- `hostname`: Hostname to set 
+  *Default*: `{{ inventory_hostname }}`
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None. This role is self-contained, but assumes an admin user exists (usually created during bootstrap).
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- hosts: managed
+  become: true
+  roles:
+    - role: common
+      vars:
+        hostname: srvprod01
+```
 
 License
 -------
 
-BSD
+MIT-0
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Created as part of a Raspberry Pi homelab Ansible setup.
+Enrico Cirignaco
