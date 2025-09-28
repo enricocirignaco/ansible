@@ -9,7 +9,7 @@
     update_cache: true
   tags: [ssh, hardening]
 
-- name: Ensure sshd drop-in directory exists
+- name: Ensure sshd directory exists
   ansible.builtin.file:
     path: /etc/ssh/sshd_config.d
     state: directory
@@ -18,9 +18,9 @@
     mode: "0755"
   tags: [ssh, hardening]
 
-- name: Deploy static SSH hardening configuration
-  ansible.builtin.copy:
-    src: hardening_ssh.conf
+- name: Deploy SSH hardening configuration (templated)
+  ansible.builtin.template:
+    src: hardening_ssh.conf.j2
     dest: /etc/ssh/sshd_config.d/10-hardening.conf
     owner: root
     group: root
@@ -34,13 +34,6 @@
   changed_when: false
   failed_when: sshd_check.rc != 0
   tags: [ssh, hardening]
-
-- name: Ensure cron is installed and running
-  ansible.builtin.systemd:
-    name: cron
-    enabled: true
-    state: started
-  tags: [updates, hardening]
 
 - name: Install security apt tools
   ansible.builtin.apt:
@@ -61,7 +54,7 @@
     mode: "0644"
   tags: [updates, hardening]
 
-- name: Ensure systemd drop-in directory exists for apt-daily-upgrade.timer
+- name: Ensure systemd directory exists for apt-daily-upgrade.timer
   ansible.builtin.file:
     path: /etc/systemd/system/apt-daily-upgrade.timer.d
     state: directory
@@ -121,7 +114,7 @@
     - /var/tmp
   tags: [files, hardening]
 
-- name: Apply non-network sysctl hardening
+- name: Apply sysctl hardening
   ansible.builtin.sysctl:
     name: "{{ item.name }}"
     value: "{{ item.value }}"
@@ -145,5 +138,4 @@
   loop: "{{ hardening_disable_services | default([]) }}"
   when: hardening_disable_services | default([]) | length > 0
   tags: [services, hardening]
-
 

@@ -1,0 +1,22 @@
+# Managed by Ansible (debian_hardening role)
+# Basic SSH hardening for Debian
+
+# Root login policy
+PermitRootLogin {{ ssh_permit_root_login }}
+
+# Authentication methods
+PasswordAuthentication {{ ssh_password_auth | ternary('yes','no') }}
+KbdInteractiveAuthentication {{ ssh_kbdinteractive_auth | ternary('yes','no') }}
+PubkeyAuthentication {{ ssh_pubkey_auth | ternary('yes','no') }}
+
+# Limits and timeouts
+MaxAuthTries {{ ssh_max_auth_tries }}
+LoginGraceTime {{ ssh_login_grace_time }}
+
+# Keep sessions alive but not forever
+ClientAliveInterval {{ ssh_client_alive_interval }}
+ClientAliveCountMax {{ ssh_client_alive_count_max }}
+
+# Restrict SSH access to specific groups
+AllowGroups {{ ssh_allow_groups | join(' ') }}
+
