@@ -7,7 +7,7 @@ It ensures system identity, base packages, safe upgrades and essential system se
 Requirements
 ------------
 
-- Ansible 2.14+
+- Ansible 2.1+
 - Collections:
   - `community.general` (for locale management)
 
@@ -51,4 +51,4 @@ Author Information
 ------------------
 
 Created as part of a Raspberry Pi homelab Ansible setup.
-Enrico Cirignaco
+Author: Enrico Cirignaco

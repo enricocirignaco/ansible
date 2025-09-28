@@ -1,0 +1,24 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for roles/debian_hardening
+# SSH policy
+ssh_password_auth: false
+ssh_kbdinteractive_auth: false
+ssh_pubkey_auth: true
+ssh_permit_root_login: "no"      # "no" | "prohibit-password" | "yes"
+ssh_max_auth_tries: 3
+ssh_login_grace_time: "30s"
+ssh_client_alive_interval: 300
+ssh_client_alive_count_max: 2
+ssh_allow_groups: ["sudo"]
+
+# Weekly upgrades (cron)
+hardening_enable_weekly_upgrade: true
+
+# Optional service disables (empty by default)
+hardening_disable_services: []
+# e.g. ["avahi-daemon", "cups", "bluetooth"]
+
+# Optional cron/at restrictions
+hardening_cron_allow_users: []   # e.g. ["root","ansible"]
+hardening_at_allow_users: []

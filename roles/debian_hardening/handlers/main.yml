@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for roles/debian_hardening
+- name: Restart sshd
+  ansible.builtin.service:
+    name: ssh
+    state: restarted
+  listen: Restart sshd
+
+- name: Reload systemd
+  ansible.builtin.command: systemctl daemon-reload
+  changed_when: true
+  listen: Reload systemd
