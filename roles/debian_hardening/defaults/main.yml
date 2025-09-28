@@ -12,13 +12,8 @@ ssh_client_alive_interval: 300
 ssh_client_alive_count_max: 2
 ssh_allow_groups: ["sudo"]
 
-# Weekly upgrades (cron)
+# Weekly upgrades instead of daily
 hardening_enable_weekly_upgrade: true
 
-# Optional service disables (empty by default)
-hardening_disable_services: []
-# e.g. ["avahi-daemon", "cups", "bluetooth"]
-
-# Optional cron/at restrictions
-hardening_cron_allow_users: []   # e.g. ["root","ansible"]
-hardening_at_allow_users: []
+# Optional service disables
+hardening_disable_services: ["cups", "bluetooth"]

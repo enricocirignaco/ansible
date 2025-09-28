@@ -63,6 +63,15 @@
     mode: "0644"
   tags: [updates, hardening]
 
+- name: Ensure unattended-upgrades is enabled (APT periodic)
+  ansible.builtin.template:
+    src: 20auto-upgrades.j2
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: "0644"
+  tags: [updates, hardening]
+
 - name: Ensure systemd directory exists for apt-daily-upgrade.timer
   ansible.builtin.file:
     path: /etc/systemd/system/apt-daily-upgrade.timer.d
@@ -83,19 +92,19 @@
   when: hardening_enable_weekly_upgrade | default(true)
   tags: [updates, hardening]
 
+- name: Remove weekly override when disabled
+  ansible.builtin.file:
+    path: /etc/systemd/system/apt-daily-upgrade.timer.d/override.conf
+    state: absent
+  when: not (hardening_enable_weekly_upgrade | default(true))
+  tags: [updates, hardening]
+
 - name: Ensure apt-daily-upgrade.timer is enabled and started
   ansible.builtin.systemd:
     name: apt-daily-upgrade.timer
     enabled: true
     state: started
     daemon_reload: true
-  tags: [updates, hardening]
-
-- name: Remove weekly override when disabled
-  ansible.builtin.file:
-    path: /etc/systemd/system/apt-daily-upgrade.timer.d/override.conf
-    state: absent
-  when: not (hardening_enable_weekly_upgrade | default(true))
   tags: [updates, hardening]
 
 - name: Optionally disable daily apt index refresh (apt-daily.timer)
