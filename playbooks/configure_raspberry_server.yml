@@ -7,7 +7,7 @@
     - common
     - debian_hardening
   vars:
-    hardening_disable_services: ["cups", "bluetooth", "avahi-daemon"]
+    hardening_disable_services: ["bluetooth"]
     ssh_allow_groups: ["admin", "sudo"]
     ssh_permit_root_login: "no"
     ssh_password_auth: false
