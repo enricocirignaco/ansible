@@ -17,6 +17,16 @@ LoginGraceTime {{ ssh_login_grace_time }}
 ClientAliveInterval {{ ssh_client_alive_interval }}
 ClientAliveCountMax {{ ssh_client_alive_count_max }}
 
-# Restrict SSH access to specific groups
-AllowGroups {{ ssh_allow_groups | join(' ') }}
+# Allow admin user to login with password
+Match User {{ admin_user }}
+  PasswordAuthentication yes
+  KbdInteractiveAuthentication yes
+  PubkeyAuthentication yes
+  AuthenticationMethods any
 
+# Force automation account to use keys only (no password fallback)
+Match User {{ user }}
+  PasswordAuthentication no
+  KbdInteractiveAuthentication no
+  PubkeyAuthentication yes
+  AuthenticationMethods publickey

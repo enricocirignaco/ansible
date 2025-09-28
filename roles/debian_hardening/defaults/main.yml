@@ -16,4 +16,4 @@ ssh_allow_groups: ["sudo"]
 hardening_enable_weekly_upgrade: true
 
 # Optional service disables
-hardening_disable_services: ["cups", "bluetooth"]
+hardening_disable_services: []

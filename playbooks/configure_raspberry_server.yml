@@ -2,5 +2,19 @@
 - name: Apply baseline configuration to a new Raspberry Pi server after bootstrap
   hosts: managed
   become: true
+  gather_facts: true
   roles:
     - common
+    - debian_hardening
+  vars:
+    hardening_disable_services: ["cups", "bluetooth", "avahi-daemon"]
+    ssh_allow_groups: ["admin", "sudo"]
+    ssh_permit_root_login: "no"
+    ssh_password_auth: false
+    ssh_kbdinteractive_auth: false
+    ssh_pubkey_auth: true
+    ssh_max_auth_tries: 3
+    ssh_login_grace_time: "30s"
+    ssh_client_alive_interval: 300
+    ssh_client_alive_count_max: 2
+  
