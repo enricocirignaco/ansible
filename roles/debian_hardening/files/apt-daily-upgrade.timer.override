@@ -1,0 +1,8 @@
+[Timer]
+# Reset any existing schedule from the original unit
+OnCalendar=
+# Run unattended upgrades once per week
+OnCalendar=weekly
+# Catch up if a run was missed while the system was down
+Persistent=true
+

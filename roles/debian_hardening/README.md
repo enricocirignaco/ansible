@@ -28,6 +28,8 @@ Variables can be set in `group_vars` or directly in playbooks.
 ### Updates
 - `hardening_disable_apt_daily_index_timer` (default: true)  
   Whether to disable the daily `apt-daily.timer` index refresh to reduce SD wear.
+- `hardening_enable_weekly_upgrade` (default: true)  
+  When true, installs a systemd drop-in that changes `apt-daily-upgrade.timer` to run weekly; when false, the drop-in is removed and the default daily schedule applies.
 
 ### Optional service controls
 - `hardening_disable_services` (default: [])  
@@ -40,7 +42,7 @@ Variables can be set in `group_vars` or directly in playbooks.
 Files
 -----
 
-- `files/hardening_ssh.conf`: SSH drop-in configuration applied to `/etc/ssh/sshd_config.d/10-hardening.conf`
+- `templates/hardening_ssh.conf.j2`: SSH drop-in generated from role variables and applied to `/etc/ssh/sshd_config.d/10-hardening.conf`
 - `files/security_unattended_upgrades.conf`: configures unattended-upgrades to install only security patches
 - `files/apt-daily-upgrade.timer.override`: systemd drop-in to run upgrades weekly instead of daily
 
@@ -68,3 +70,11 @@ Author Information
 
 Created as part of a Raspberry Pi homelab Ansible setup.
 Author: Enrico Cirignaco
+
+
+what it does:
+- SSH hardening
+- automated weekly security patches
+- protect sensitive files
+- sysctl hardening
+- disable unnecessary services

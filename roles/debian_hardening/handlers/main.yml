@@ -6,8 +6,3 @@
     name: ssh
     state: restarted
   listen: Restart sshd
-
-- name: Reload systemd
-  ansible.builtin.command: systemctl daemon-reload
-  changed_when: true
-  listen: Reload systemd

@@ -18,6 +18,16 @@
     mode: "0755"
   tags: [ssh, hardening]
 
+- name: Ensure sshd_config includes drop-in directory
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^\s*#?\s*Include\s+/etc/ssh/sshd_config\.d/\*\.conf$'
+    line: 'Include /etc/ssh/sshd_config.d/*.conf'
+    state: present
+    insertafter: EOF
+  notify: Restart sshd
+  tags: [ssh, hardening]
+
 - name: Deploy SSH hardening configuration (templated)
   ansible.builtin.template:
     src: hardening_ssh.conf.j2
@@ -39,7 +49,6 @@
   ansible.builtin.apt:
     name:
       - unattended-upgrades
-      - apt-transport-https
       - apt-utils
     state: present
     update_cache: true
@@ -61,6 +70,7 @@
     owner: root
     group: root
     mode: "0755"
+  when: hardening_enable_weekly_upgrade | default(true)
   tags: [updates, hardening]
 
 - name: Deploy systemd timer override for weekly security-only upgrades
@@ -70,15 +80,22 @@
     owner: root
     group: root
     mode: "0644"
-  notify: Reload systemd
+  when: hardening_enable_weekly_upgrade | default(true)
   tags: [updates, hardening]
 
-- name: Enable and start apt-daily-upgrade.timer (weekly schedule)
+- name: Ensure apt-daily-upgrade.timer is enabled and started
   ansible.builtin.systemd:
     name: apt-daily-upgrade.timer
     enabled: true
     state: started
     daemon_reload: true
+  tags: [updates, hardening]
+
+- name: Remove weekly override when disabled
+  ansible.builtin.file:
+    path: /etc/systemd/system/apt-daily-upgrade.timer.d/override.conf
+    state: absent
+  when: not (hardening_enable_weekly_upgrade | default(true))
   tags: [updates, hardening]
 
 - name: Optionally disable daily apt index refresh (apt-daily.timer)
@@ -138,4 +155,3 @@
   loop: "{{ hardening_disable_services | default([]) }}"
   when: hardening_disable_services | default([]) | length > 0
   tags: [services, hardening]
-
