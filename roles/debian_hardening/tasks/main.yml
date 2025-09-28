@@ -45,6 +45,10 @@
   failed_when: sshd_check.rc != 0
   tags: [ssh, hardening]
 
+- name: Apply SSH changes immediately
+  ansible.builtin.meta: flush_handlers
+  tags: [ssh, hardening]
+
 - name: Install security apt tools
   ansible.builtin.apt:
     name:
