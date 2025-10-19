@@ -1,38 +1,92 @@
-# Infrastructure Automation with Ansible
-## Automation Lifecycle
-In infrastructure automation, it’s useful to distinguish between Day 0, Day 1, and Day 2 operations.
-Each stage represents a different point in the system’s lifecycle — from first boot, to configuration, to ongoing maintenance.
-This separation helps keep IaC code focused, idempotent, and easy to reuse.
+# Infrastructure Automation
+## Knowledge
+## Infrastructure as Code (IaC)
 
-### Day 0 – Provisioning
-The goal of Day 0 operations is simply to make a machine reachable and ready for management.
-At this stage, no configuration management tools are running yet.
-Everything is about getting basic network and access in place.
-	•	Flash or install the base operating system.
-	•	Configure hostname, network, and enable SSH.
-	•	Add your control node’s public key or password.
-	•	Usually done manually, via an imaging tool, or with cloud-init.
+**Infrastructure as Code (IaC)** is the practice of defining, managing, and provisioning infrastructure — such as servers, networks, and services — using machine-readable configuration files rather than manual processes or ad-hoc scripts.  
+The idea is to treat infrastructure like application code: version-controlled, reviewable, testable, and reproducible.
 
-Day 0 ends once the automation agent (in this case Ansible) can establish an SSH connection to the host.
-In a virtualized enviroments htis role is usually taken over by dedicated provisioning tools like Terraform. In smaller enviroments like home labs this step can't be automated since it requires manual hardware setup and installation
+Instead of “clicking through” graphical interfaces or running commands manually, the infrastructure’s desired state is expressed in code and applied automatically.  
+This ensures that environments can be created, destroyed, and recreated consistently across development, staging, and production.
 
-### Day 1 – Bootstrap
-Day 1 transforms a fresh system into a properly managed host.
-This is the first Thruly automated step, establishing a consistent administrative baseline.
-	•	Create the ansible admin user and install SSH keys.
-	•	Install Python (required for Ansible modules).
-	•	Enable password-less sudo for automation.
-	•	Apply minimal setup (timezone, locale, package tools).
+---
 
-**This phase runs only once per host.**
+### IaC vs Configuration Management
 
-### Day 2 – Operations
-Once a host is under management, Day 2 automations enforce and maintain its desired state.
-These tasks can be safely re-applied at any time.
-	•	Apply system configuration and security hardening.
-	•	Configure networking and essential services.
-	•	Install and manage software such as Docker or k3s.
-	•	Schedule regular updates, backups, and monitoring.
+Although the terms often overlap, it’s useful to distinguish between:
 
-Day 2 automation represents the normal operational lifecycle of your systems.
-It’s where most of the automation will be done.
+- **Infrastructure as Code (IaC):** focuses on *provisioning* and *orchestrating* physical or virtual resources — servers, networks, load balancers, storage volumes, etc.  
+  *Examples:* Terraform, CloudFormation, Ansible (in some cases).
+
+- **Configuration as Code (CaC):** focuses on *configuring* the software and services that run on top of that infrastructure — installing packages, managing files, starting services, enforcing policies.  
+  *Examples:* Ansible, Puppet, Chef.
+
+Both models complement each other: IaC builds the environment, while CaC ensures it runs as intended.  
+In practice, teams often use “IaC” to refer to the combination of both provisioning and configuration management — and this repository follows that convention.
+
+---
+
+### Key Principles of IaC
+
+- **Idempotence**  
+  Running the same automation repeatedly should produce the same result.  
+  Tasks must be safe to reapply without side effects.
+
+- **Declarative over Imperative**  
+  Focus on *what* the final state should be (“nginx is installed and running”) rather than *how* to achieve it step by step.
+
+- **Composability and Reuse**  
+  Build small, focused modules or roles that can be combined to define more complex systems.
+
+- **Observability and Safety**  
+  Include validation, logging, and safe defaults so that automation remains transparent and predictable.
+
+---
+
+By applying these principles, Infrastructure as Code turns manual setup into a controlled, repeatable process — making infrastructure changes traceable, reversible, and auditable.
+
+### Automation Lifecycle
+
+Modern infrastructure management benefits from a clear separation of lifecycle stages.  
+By distinguishing **Day 0**, **Day 1**, and **Day 2** operations, we can design automation that is safer, more repeatable, and easier to extend over time.  
+Each phase builds on the previous one: Day 0 makes a system reachable, Day 1 makes it manageable, and Day 2 ensures it stays consistent and secure.
+
+#### Day 0 – Provisioning
+Day 0 focuses on preparing a machine or environment so it becomes accessible for automation.  
+At this stage, configuration management tools like Ansible are not yet involved — the goal is purely to get a working operating system with remote access.
+
+Typical tasks include:
+- Installing or flashing the base operating system.
+- Configuring hostname, networking, and remote access (e.g., SSH).
+- Adding control-plane public keys or setting temporary credentials.
+
+In cloud or virtualized environments, this step is often handled by prebaked OS images or infrastructure provisioning tools like **Terraform**.  
+For physical servers or smaller homelab systems, these steps are usually performed manually or via imaging scripts.
+
+#### Day 1 – Bootstrap
+Once the system is reachable, Day 1 automation transforms it into a **managed host**.  
+The focus here is on establishing a stable and uniform management baseline so configuration tools can safely take over.
+
+Typical tasks include:
+- Creating a dedicated automation or admin user and deploying SSH keys or API credentials.
+- Installing Python and essential runtime dependencies.
+- Granting controlled privilege escalation (sudo) where required.
+- Applying minimal system settings such as timezone, locale, and base packages.
+
+This phase typically runs once per host — it’s the “import” step that brings new machines into the managed fleet.  
+Bootstrap playbooks should remain small, focused, and easy to re-run safely.
+
+#### Day 2 – Operations and Maintenance
+Day 2 automation is where most of the ongoing infrastructure work happens.  
+At this stage, hosts are fully managed and configuration management enforces desired state continuously.  
+The goal is to configure, maintain, and evolve systems reliably over time.
+
+Typical tasks include:
+- Applying system configuration and security hardening.
+- Managing networking, services, and application settings.
+- Installing and updating software (containers, orchestration agents, monitoring tools).
+- Running regular updates, backups, and integrity checks.
+- Detecting and remediating configuration drift.
+
+Day 2 operations can be further divided into **recurring automation** (e.g., scheduled updates or backups) and **ad-hoc automation** (e.g., deploying new services or changing configurations).  
+Most Infrastructure-as-Code effort lies here, and it’s best practice to keep logic modular, declarative, and idempotent.
+
