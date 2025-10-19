@@ -1,6 +1,6 @@
-# Infrastructure Automation
-## Knowledge
-## Infrastructure as Code (IaC)
+# Infrastructure Automation with Ansible
+## Core Concepts
+### Infrastructure as Code (IaC)
 
 **Infrastructure as Code (IaC)** is the practice of defining, managing, and provisioning infrastructure — such as servers, networks, and services — using machine-readable configuration files rather than manual processes or ad-hoc scripts.  
 The idea is to treat infrastructure like application code: version-controlled, reviewable, testable, and reproducible.
