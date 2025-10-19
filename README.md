@@ -111,10 +111,7 @@ To create a new role, use the Ansible Galaxy command to scaffold the structure:
 ```bash
 ansible-galaxy init roles/<role_name>
 ```
-
-This generates a complete role scaffold with directories for tasks, templates, handlers, variables, and files.  
-Example:
-
+You can think of Ansible Galaxy as a Package Manager for Ansible Roles. Once created you can also share and download roles from the Ansible Galaxy community repository.
 
 You can then include the role in a playbook:
 ```yaml
@@ -145,9 +142,3 @@ Run only specific tags:
 ```bash
 ansible-playbook playbooks/site.yml --tags hardening,network
 ```
-
----
-
-
-### IaC Repository Structure
-
