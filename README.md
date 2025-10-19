@@ -162,3 +162,16 @@ ansible-playbook playbooks/site.yml --tags hardening,network
 ```
 
 ---
+## Roles
+
+This repository is organized into modular Ansible roles:
+
+- [x] [common](roles/common/README.md) — Ensures basic system setup, locales, and essential packages.  
+- [x] [debian_hardening](roles/debian_hardening/README.md) — Applies Debian-specific hardening policies and security configuration.  
+- [ ] [network](roles/network/README.md) — Manages interface configuration, DNS, and firewall rules.  
+- [ ] [docker](roles/docker/README.md) — Installs and configures Docker Engine and container runtime settings.  
+- [ ] [backup](roles/backup/README.md) — Configures automated backups and restore routines.  
+- [ ] [monitoring](roles/monitoring/README.md) — Sets up metrics, logging, and alerting for managed hosts.  
+- [ ] [updates](roles/updates/README.md) — Handles automatic package updates and version pinning.  
+
+You can navigate to each role’s folder to view its dedicated README and implementation details.
