@@ -40,15 +40,17 @@ In practice, teams often use “IaC” to refer to the combination of both provi
 - **Observability and Safety**  
   Include validation, logging, and safe defaults so that automation remains transparent and predictable.
 
----
-
 By applying these principles, Infrastructure as Code turns manual setup into a controlled, repeatable process — making infrastructure changes traceable, reversible, and auditable.
+
+---
 
 ### Automation Lifecycle
 
 Modern infrastructure management benefits from a clear separation of lifecycle stages.  
 By distinguishing **Day 0**, **Day 1**, and **Day 2** operations, we can design automation that is safer, more repeatable, and easier to extend over time.  
 Each phase builds on the previous one: Day 0 makes a system reachable, Day 1 makes it manageable, and Day 2 ensures it stays consistent and secure.
+
+![](docs/images/automation-lifecycle.png)
 
 #### Day 0 – Provisioning
 Day 0 focuses on preparing a machine or environment so it becomes accessible for automation.  
@@ -89,4 +91,63 @@ Typical tasks include:
 
 Day 2 operations can be further divided into **recurring automation** (e.g., scheduled updates or backups) and **ad-hoc automation** (e.g., deploying new services or changing configurations).  
 Most Infrastructure-as-Code effort lies here, and it’s best practice to keep logic modular, declarative, and idempotent.
+
+---
+
+## Ansible Concepts
+
+Ansible is a lightweight, agentless automation tool that describes infrastructure and system configuration as code.  
+Core components of an Ansible IaC project include:
+
+- **Playbooks** — YAML files that describe the desired state of systems. Each playbook defines *what* to apply and *where*.  
+- **Roles** — reusable collections of tasks, templates, files, and variables. Roles make automation modular and easy to maintain.  
+- **Inventory** — defines the hosts and groups of hosts managed by Ansible, along with their connection details and variables.
+
+For detailed explanations and advanced features, refer to the official [Ansible documentation](https://docs.ansible.com/ansible/latest/getting_started/index.html).
+
+---
+To create a new role, use the Ansible Galaxy command to scaffold the structure:
+
+```bash
+ansible-galaxy init roles/<role_name>
+```
+
+This generates a complete role scaffold with directories for tasks, templates, handlers, variables, and files.  
+Example:
+
+
+You can then include the role in a playbook:
+```yaml
+- hosts: managed
+  become: true
+  roles:
+    - role: myrole
+```
+
+Those are the most important commands that you will need to get started:
+
+Run a playbook against your inventory:
+```bash
+ansible-playbook -i inventories/prod/hosts.ini playbooks/site.yml
+```
+
+Check connectivity to all hosts:
+```bash
+ansible all -m ping -i inventories/prod/hosts.ini
+```
+
+Run a playbook limited to a single host:
+```bash
+ansible-playbook playbooks/site.yml --limit srvprod01
+```
+
+Run only specific tags:
+```bash
+ansible-playbook playbooks/site.yml --tags hardening,network
+```
+
+---
+
+
+### IaC Repository Structure
 
