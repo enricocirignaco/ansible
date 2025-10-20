@@ -1,0 +1,6 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for roles/network
+network_disable_ipv6: true
+network_type: ethernet
+network_reboot_if_changed: true

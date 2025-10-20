@@ -1,0 +1,108 @@
+#SPDX-License-Identifier: MIT-0
+---
+
+- name: Preflight | Ensure required variables are defined
+  ansible.builtin.assert:
+    that:
+      - network_interface is defined and network_interface is string
+      - network_address is defined and network_address is ipaddr('network')
+      - network_gateway is defined and network_gateway is ipaddr
+      - network_dns is defined and network_dns is iterable
+      - network_dns | select('ipaddr') | list | length == (network_dns | length)
+
+    fail_msg: >-
+      Missing required variables. You must define network_interface, network_address,
+      network_gateway, and network_dns (list). Example:
+      network_interface: eth0
+      network_address: 192.168.1.157/24
+      network_gateway: 192.168.1.1
+      network_dns: ["192.168.1.1", "1.1.1.1"]
+  tags: [network]
+
+- name: Ensure NetworkManager is installed
+  ansible.builtin.apt:
+    name: network-manager
+    state: present
+    update_cache: true
+  become: true
+  tags: [network]
+
+- name: Ensure NetworkManager service is enabled and running
+  ansible.builtin.systemd:
+    name: NetworkManager
+    enabled: true
+    state: started
+  become: true
+  tags: [network]
+
+- name: Configure static IPv4 connection with NetworkManager
+  community.general.nmcli:
+    conn_name: "{{ network_interface }}"
+    ifname: "{{ network_interface }}"
+    type: "{{ network_type }}"
+    autoconnect: yes
+    ip4: "{{ network_address }}"
+    gw4: "{{ network_gateway }}"
+    dns4: "{{ network_dns }}"
+    state: present
+    wait: yes
+    reload: yes
+  become: true
+  register: nmcli_result
+  tags: [network]
+
+- name: Disable IPv6 on this connection
+  community.general.nmcli:
+    conn_name: "{{ network_interface }}"
+    ipv6_method: ignore
+    state: present
+    reload: yes
+    wait: yes
+  become: true
+  register: nmcli_ipv6_result
+  tags: [network]
+  when: network_disable_ipv6
+
+- name: Activate Avahi (mDNS)
+  ansible.builtin.systemd:
+    name: avahi-daemon
+    enabled: true
+    state: started
+  become: true
+  register: avahi_result
+  tags: [network, dns]
+
+- name: Disable LLMNR
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/resolved.conf
+    regexp: '^LLMNR='
+    line: 'LLMNR=no'
+    create: yes
+  become: true
+  register: llmnr_result
+  tags: [network, dns]
+
+- name: Restart systemd-resolved if LLMNR changed
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    state: restarted
+  become: true
+  when: llmnr_result is defined and llmnr_result.changed
+  tags: [network, dns]
+
+- name: Reboot system if needed
+  ansible.builtin.reboot:
+    msg: "Rebooting to apply network sysctl and discovery policy changes."
+    connect_timeout: 5
+    reboot_timeout: 300
+  become: true
+  when:
+    - network_reboot_if_changed
+    - >
+      (
+        (nmcli_result is defined and nmcli_result.changed)
+        or (nmcli_ipv6_result is defined and nmcli_ipv6_result.changed)
+        or (avahi_result is defined and avahi_result.changed)
+        or (llmnr_result is defined and llmnr_result.changed)
+      )
+  tags: [network, reboot]
