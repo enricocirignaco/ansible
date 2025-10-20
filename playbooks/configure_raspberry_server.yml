@@ -6,7 +6,9 @@
   roles:
     - common
     - debian_hardening
+    - network
   vars:
+    hostname: "srvprod01"
     hardening_disable_services: ["bluetooth"]
     ssh_allow_groups: ["admin", "sudo"]
     ssh_permit_root_login: "no"
@@ -17,4 +19,8 @@
     ssh_login_grace_time: "30s"
     ssh_client_alive_interval: 300
     ssh_client_alive_count_max: 2
+    network_interface: "eth0"
+    network_address: "192.168.1.128/24"
+    network_gateway: "192.168.1.1"
+    network_dns: ["127.0.0.1", "192.168.1.126"]
   

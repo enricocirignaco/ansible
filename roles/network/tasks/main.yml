@@ -5,10 +5,11 @@
   ansible.builtin.assert:
     that:
       - network_interface is defined and network_interface is string
-      - network_address is defined and network_address is ipaddr('network')
-      - network_gateway is defined and network_gateway is ipaddr
+      - "'/' in network_address"
+      - (network_address | ansible.utils.ipaddr('address')) is ansible.utils.ipv4
+      - network_gateway is defined and network_gateway is ansible.utils.ipv4
       - network_dns is defined and network_dns is iterable
-      - network_dns | select('ipaddr') | list | length == (network_dns | length)
+      - network_dns | select('ansible.utils.ipv4') | list | length == (network_dns | length)
 
     fail_msg: >-
       Missing required variables. You must define network_interface, network_address,
@@ -17,6 +18,32 @@
       network_address: 192.168.1.157/24
       network_gateway: 192.168.1.1
       network_dns: ["192.168.1.1", "1.1.1.1"]
+  tags: [network]
+
+- name: Ensure arping tool is installed
+  ansible.builtin.apt:
+    name: iputils-arping
+    state: present
+    update_cache: false
+  become: true
+  tags: [network]
+
+- name: Probe for duplicate IP on the LAN (ARP DAD)
+  ansible.builtin.command: >
+    arping -D -I {{ network_interface }} -c 2 -w 2 {{ network_address | ansible.utils.ipaddr('address') }}
+  register: _arping
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [network]
+
+- name: Abort if desired IP is already in use
+  ansible.builtin.fail:
+    msg: >
+      IP {{ network_address | ansible.utils.ipaddr('address') }} appears to be in use on the local network
+      (ARP replies seen). Aborting to prevent an address conflict.
+      arping output: {{ _arping.stdout | default('') }} {{ _arping.stderr | default('') }}
+  when: _arping.rc == 1
   tags: [network]
 
 - name: Ensure NetworkManager is installed
@@ -41,12 +68,11 @@
     ifname: "{{ network_interface }}"
     type: "{{ network_type }}"
     autoconnect: yes
+    method4: manual
     ip4: "{{ network_address }}"
     gw4: "{{ network_gateway }}"
     dns4: "{{ network_dns }}"
     state: present
-    wait: yes
-    reload: yes
   become: true
   register: nmcli_result
   tags: [network]
@@ -54,10 +80,8 @@
 - name: Disable IPv6 on this connection
   community.general.nmcli:
     conn_name: "{{ network_interface }}"
-    ipv6_method: ignore
+    method6: ignore
     state: present
-    reload: yes
-    wait: yes
   become: true
   register: nmcli_ipv6_result
   tags: [network]
@@ -68,34 +92,17 @@
     name: avahi-daemon
     enabled: true
     state: started
+    masked: false
   become: true
   register: avahi_result
   tags: [network, dns]
 
-- name: Disable LLMNR
-  ansible.builtin.lineinfile:
-    path: /etc/systemd/resolved.conf
-    regexp: '^LLMNR='
-    line: 'LLMNR=no'
-    create: yes
-  become: true
-  register: llmnr_result
-  tags: [network, dns]
-
-- name: Restart systemd-resolved if LLMNR changed
-  ansible.builtin.systemd:
-    name: systemd-resolved
-    state: restarted
-  become: true
-  when: llmnr_result is defined and llmnr_result.changed
-  tags: [network, dns]
-
 - name: Reboot system if needed
-  ansible.builtin.reboot:
-    msg: "Rebooting to apply network sysctl and discovery policy changes."
-    connect_timeout: 5
-    reboot_timeout: 300
+  ansible.builtin.shell: "nohup bash -c 'sleep 2 && /sbin/reboot' >/dev/null 2>&1 &"
   become: true
+  async: 1
+  poll: 0
+  ignore_errors: true
   when:
     - network_reboot_if_changed
     - >
@@ -103,6 +110,5 @@
         (nmcli_result is defined and nmcli_result.changed)
         or (nmcli_ipv6_result is defined and nmcli_ipv6_result.changed)
         or (avahi_result is defined and avahi_result.changed)
-        or (llmnr_result is defined and llmnr_result.changed)
       )
   tags: [network, reboot]
