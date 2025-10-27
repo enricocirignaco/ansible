@@ -1,8 +1,6 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/docker
-#SPDX-License-Identifier: MIT-0
----
 - name: Install prerequisites
   apt:
     name:
@@ -27,12 +25,18 @@
     mode: "0644"
   become: true
 
+- name: Determine Docker repo architecture
+  ansible.builtin.set_fact:
+    docker_repo_arch: >-
+      {{ {'x86_64':'amd64','aarch64':'arm64','arm64':'arm64','armv7l':'armhf','armv6l':'armhf'}.get(ansible_architecture, ansible_architecture) }}
+  tags: [docker]
+
 - name: Add Docker apt repository
   ansible.builtin.copy:
     dest: /etc/apt/sources.list.d/docker.list
     mode: "0644"
     content: |
-      deb [arch={{ lookup('pipe','dpkg --print-architecture') }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ lookup('pipe', '. /etc/os-release && echo $VERSION_CODENAME') }} stable
+      deb [arch={{ docker_repo_arch }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
   become: true
 
 - name: Install Docker Engine

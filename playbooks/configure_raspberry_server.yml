@@ -8,6 +8,7 @@
     - raspberry
     - debian_hardening
     - network
+    - docker
   vars:
     hostname: "srvprod01"
     hardening_disable_services: ["bluetooth"]
