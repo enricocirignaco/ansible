@@ -5,6 +5,7 @@
   gather_facts: true
   roles:
     - common
+    - raspberry
     - debian_hardening
     - network
   vars:
