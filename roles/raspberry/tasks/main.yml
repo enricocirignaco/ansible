@@ -1,3 +1,91 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/raspberry
+
+# Ensure we are running on a Raspberry Pi and config exists
+- name: Read device model string from device tree
+  ansible.builtin.slurp:
+    path: /proc/device-tree/model
+  register: _dt_model
+  ignore_errors: true
+
+- name: Extract model string (strip NUL terminator)
+  ansible.builtin.set_fact:
+    _dt_model_str: "{{ (_dt_model.content | b64decode | regex_replace('\\u0000','')) if (_dt_model is defined and _dt_model.content is defined) else '' }}"
+
+- name: Fail if not a Raspberry Pi
+  ansible.builtin.fail:
+    msg: "This host is not a Raspberry Pi. Detected model: {{ _dt_model_str | default('unknown') }}"
+  when: _dt_model_str is not search('Raspberry Pi')
+
+- name: Detect Raspberry Pi boot configuration path
+  ansible.builtin.stat:
+    path: "{{ raspberry_boot_config_path }}"
+  register: raspberry_boot_config_stat
+  tags: [raspberry]
+
+- name: Set boot config path to fallback if primary was not found
+  ansible.builtin.set_fact:
+    raspberry_boot_config_path: "{{ raspberry_boot_config_path_fallback }}"
+  when: not raspberry_boot_config_stat.stat.exists
+  tags: [raspberry]
+
+# configure Raspberry Pi hardware
+- name: Ensure Raspberry Pi boot configuration
+  ansible.builtin.blockinfile:
+    path: "{{ raspberry_boot_config_path }}"
+    marker: "# {mark} ANSIBLE raspberry hardware config"
+    block: |
+      # Disable radios and peripherals
+      dtoverlay=disable-wifi
+      dtoverlay=disable-bt
+      hdmi_blanking=2
+      dtparam=audio=off
+      camera_auto_detect=0
+
+      # Reduce GPU memory
+      gpu_mem=16
+
+      # Enable Hardware Watchdog
+      dtparam=watchdog=on
+
+  become: true
+  register: bootcfg_result
+  tags: [raspberry]
+
+# Start watchdog service
+- name: Ensure watchdog package is installed
+  ansible.builtin.apt:
+    name: watchdog
+    state: present
+    update_cache: false
+  become: true
+  tags: [raspberry]
+
+- name: Enable watchdog service
+  ansible.builtin.systemd:
+    name: watchdog
+    enabled: true
+    state: started
+  become: true
+  tags: [raspberry]
+
+# Expand filesystem
+- name: Expand filesystem to full device size
+  ansible.builtin.command: raspi-config --expand-rootfs
+  become: true
+  register: expandfs
+  changed_when: "'rootfs already expanded' not in expandfs.stdout"
+  failed_when: false
+  tags: [raspberry]
+
+# Reboot if needed
+- name: Reboot if /boot or hardware settings changed
+  ansible.builtin.reboot:
+    msg: "Rebooting to apply Raspberry Pi hardware configuration changes."
+    reboot_timeout: 600
+  become: true
+  when:
+    - bootcfg_result is defined and bootcfg_result.changed
+      or expandfs is defined and expandfs.changed
+  tags: [raspberry, reboot]
