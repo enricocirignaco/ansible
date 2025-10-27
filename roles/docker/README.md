@@ -1,38 +1,48 @@
-Role Name
-=========
+Docker role
+===========
 
-A brief description of the role goes here.
+This role installs Docker Engine on Debian-based hosts using the official Docker APT repository.  
+It configures a sane default daemon profile, enables log rotation, and ensures the service stays running.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Ansible 2.1+
+- Debian or Raspberry Pi OS target with `apt` available
+- Outbound HTTPS access to `download.docker.com` to retrieve the repository key and packages
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+This role does not expose user-facing variables yet. Override files or extend the role if custom daemon settings are required.
 
-Dependencies
-------------
+What the role does
+------------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- Installs prerequisite packages (`ca-certificates`, `curl`, `gnupg`) needed for APT repository setup.
+- Creates `/etc/apt/keyrings` and downloads Docker’s GPG signing key (`docker.asc`).
+- Adds the Docker Stable repository for the host’s architecture and Debian version codename.
+- Installs Docker Engine components (`docker-ce`, CLI, containerd, buildx, compose plugin).
+- Deploys `/etc/docker/daemon.json` with JSON-file logging (10 MB max size, 3 files) and sets the cgroup driver to `systemd`.
+- Enables and starts the `docker` systemd service; restarts it when configuration changes occur.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- hosts: docker_hosts
+  become: true
+  roles:
+    - role: docker
+```
 
 License
 -------
 
-BSD
+MIT-0
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Created as part of a Raspberry Pi homelab Ansible setup.
+Author: Enrico Cirignaco
