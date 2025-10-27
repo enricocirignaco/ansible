@@ -1,38 +1,51 @@
-Role Name
-=========
+Raspberry role
+==============
 
-A brief description of the role goes here.
+This role applies a conservative hardware baseline for Raspberry Pi hosts.  
+It hardens the boot configuration, enables the hardware watchdog, expands the root filesystem once, and reboots only when required.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Ansible 2.1+
+- Target host must expose the Raspberry Pi boot configuration (`config.txt`)
+- `raspi-config` available on the target when filesystem expansion is desired
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- `raspberry_boot_config_path`  
+  Path to the Raspberry Pi `config.txt` file that should be managed.  
+  *Default*: `/boot/firmware/config.txt`
 
-Dependencies
-------------
+What the role does
+------------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- Ensures a boot configuration block that disables Wi-Fi, Bluetooth, HDMI output, onboard audio, and camera auto-detection.
+- Reduces GPU memory allocation to 16 MB to reserve RAM for the CPU.
+- Enables the hardware watchdog through both firmware (`dtparam=watchdog=on`) and the systemd service.
+- Invokes `raspi-config --expand-rootfs` to grow the root filesystem to the full media size (ignored if the filesystem is already expanded).
+- Reboots the host when the boot configuration or filesystem expansion reports a change.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- hosts: raspberry
+  become: true
+  roles:
+    - role: raspberry
+      vars:
+        raspberry_boot_config_path: /boot/config.txt
+```
 
 License
 -------
 
-BSD
+MIT-0
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Created as part of a Raspberry Pi homelab Ansible setup.
+Author: Enrico Cirignaco
