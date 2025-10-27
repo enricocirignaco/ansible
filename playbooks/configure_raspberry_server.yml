@@ -4,12 +4,14 @@
   become: true
   gather_facts: true
   roles:
-    - common
-    - raspberry
-    - debian_hardening
-    - network
-    - docker
+    - debian-update
+    # - common
+    # - raspberry
+    # - debian_hardening
+    # - network
+    # - docker
   vars:
+    system_update_mode: "full"
     hostname: "srvprod01"
     hardening_disable_services: ["bluetooth"]
     ssh_allow_groups: ["admin", "sudo"]

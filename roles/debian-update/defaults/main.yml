@@ -1,3 +1,9 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/debian-update
+
+# What kind of upgrade to perform:
+# 'safe'   → performs a regular upgrade without removing packages
+# 'full'   → performs a full distribution upgrade, allowing installation or removal of packages
+# 'minimal' → upgrades only essential or critical packages as configured in APT
+system_update_mode: "safe"

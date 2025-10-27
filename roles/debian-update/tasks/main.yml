@@ -1,3 +1,44 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/debian-update
+
+# System update role for Debian / Raspberry Pi OS
+
+- name: Ensure APT cache is up to date
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+  tags: [update, apt]
+
+- name: Upgrade system packages
+  ansible.builtin.apt:
+    upgrade: "{{ system_update_mode }}"
+  become: true
+  tags: [update, upgrade]
+
+- name: Autoremove unused packages
+  ansible.builtin.apt:
+    autoremove: true
+  become: true
+  tags: [update, clean]
+
+- name: Autoclean APT cache
+  ansible.builtin.apt:
+    autoclean: true
+  become: true
+  tags: [update, clean]
+
+- name: Check if a reboot is required
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: reboot_required
+  tags: [update, reboot]
+
+- name: Reboot if required
+  ansible.builtin.reboot:
+    msg: "Rebooting after kernel/libc update."
+    reboot_timeout: 600
+  when: reboot_required.stat.exists
+  become: true
+  tags: [update, reboot]

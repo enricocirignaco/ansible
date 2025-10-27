@@ -1,38 +1,51 @@
-Role Name
-=========
+Debian update role
+==================
 
-A brief description of the role goes here.
+This role keeps Debian or Raspberry Pi OS hosts patched.  
+It refreshes the APT cache, performs upgrades, removes obsolete packages, cleans the cache, and reboots only when the system requests it.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Ansible 2.1+
+- Debian-based target with APT available
+- Privileged access (become) to apply upgrades and reboot
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- `system_update_mode`  
+  Controls the upgrade strategy supplied to `apt` (`safe`, `full`, `minimal`).  
+  *Default*: `"safe"`
 
-Dependencies
-------------
+What the role does
+------------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- Refreshes the APT package index with a configurable cache validity.
+- Runs `apt upgrade` with the requested mode (`safe` by default) to install updates.
+- Removes unused packages via `apt autoremove`.
+- Purges cached package files with `apt autoclean`.
+- Checks for `/var/run/reboot-required` and triggers a reboot if the system needs it.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- hosts: debian
+  become: true
+  roles:
+    - role: debian-update
+      vars:
+        system_update_mode: full
+```
 
 License
 -------
 
-BSD
+MIT-0
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Created as part of a Raspberry Pi homelab Ansible setup.
+Author: Enrico Cirignaco
