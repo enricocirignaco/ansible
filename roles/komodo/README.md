@@ -36,11 +36,6 @@ The role asserts that each value is defined and non-empty before proceeding.
 ### Optional
 
 - `komodo_timezone` (default `"Europe/Zurich"`): injected into all services for scheduling and logging.
-- `komodo_first_server` (default `"https://periphery:8120"`): initial periphery endpoint Komodo offers during onboarding.
-- `komodo_jwt_ttl` (default `"1-day"`): JWT token lifetime.
-- `komodo_local_auth` (default `true`): enables Komodo’s local username/password login.
-- `periphery_ssl_enabled` (default `true`): enables TLS for the periphery container.
-
 Derived compose variables such as `KOMODO_BACKUPS_PATH`, `KOMODO_SYNCS_PATH`, and `PERIPHERY_PATH` are computed relative to `komodo_deployment_directory`.
 
 Secret Management

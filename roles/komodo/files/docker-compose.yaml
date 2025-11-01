@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   postgres:
@@ -43,11 +42,8 @@ services:
       TZ: "${TIMEZONE}"
       KOMODO_PASSKEY: "${KOMODO_PASSKEY}"
       KOMODO_HOST: "${KOMODO_HOST}"
-      KOMODO_FIRST_SERVER: "${KOMODO_FIRST_SERVER}"
       KOMODO_WEBHOOK_SECRET: "${KOMODO_WEBHOOK_SECRET}"
       KOMODO_JWT_SECRET: "${KOMODO_JWT_SECRET}"
-      KOMODO_JWT_TTL: "${KOMODO_JWT_TTL}"
-      KOMODO_LOCAL_AUTH: "${KOMODO_LOCAL_AUTH}"
     volumes:
       - "${KOMODO_BACKUPS_PATH}:/backups"
       - "${KOMODO_SYNCS_PATH}:/syncs"
@@ -62,7 +58,6 @@ services:
       KOMODO_PASSKEY: "${KOMODO_PASSKEY}"
       PERIPHERY_ROOT_DIRECTORY: "${PERIPHERY_PATH}"
       PERIPHERY_PASSKEYS: "${KOMODO_PASSKEY}"
-      PERIPHERY_SSL_ENABLED: "${PERIPHERY_SSL_ENABLED}"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/proc:/proc"
