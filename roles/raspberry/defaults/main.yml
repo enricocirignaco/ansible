@@ -3,3 +3,4 @@
 # defaults file for roles/raspberry
 raspberry_boot_config_path: "/boot/firmware/config.txt"
 raspberry_boot_config_path_fallback: "/boot/config.txt"
+raspberry_disable_pi_user: false

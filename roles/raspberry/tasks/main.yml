@@ -53,6 +53,16 @@
   register: bootcfg_result
   tags: [raspberry]
 
+- name: Disable legacy pi user when requested
+  ansible.builtin.user:
+    name: pi
+    password_lock: true
+    shell: /usr/sbin/nologin
+    state: present
+  become: true
+  when: raspberry_disable_pi_user | bool
+  tags: [raspberry, users]
+
 # Start watchdog service
 - name: Ensure watchdog package is installed
   ansible.builtin.apt:

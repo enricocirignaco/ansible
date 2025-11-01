@@ -17,6 +17,9 @@ Role Variables
 - `raspberry_boot_config_path`  
   Path to the Raspberry Pi `config.txt` file that should be managed.  
   *Default*: `/boot/firmware/config.txt`
+- `raspberry_disable_pi_user`  
+  When `true`, lock the legacy `pi` account and set its shell to `/usr/sbin/nologin`.  
+  *Default*: `true`
 
 What the role does
 ------------------
