@@ -24,6 +24,7 @@
       - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICHvfORDLKCBFhwwviIAY2RtARl3LclLIEVE1r7JCVMl"
     hostname: "srvprod01"
     raspberry_disable_pi_user: true
+    raspberry_expand_rootfs: false
     hardening_disable_services: ["bluetooth"]
     ssh_allow_groups: ["admin", "sudo"]
     ssh_permit_root_login: "no"

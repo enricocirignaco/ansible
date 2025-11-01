@@ -87,6 +87,7 @@
   register: expandfs
   changed_when: "'rootfs already expanded' not in expandfs.stdout"
   failed_when: false
+  when: raspberry_expand_rootfs | bool
   tags: [raspberry]
 
 # Reboot if needed
@@ -97,5 +98,5 @@
   become: true
   when:
     - bootcfg_result is defined and bootcfg_result.changed
-      or expandfs is defined and expandfs.changed
+      or (raspberry_expand_rootfs | bool and expandfs is defined and expandfs.changed)
   tags: [raspberry, reboot]
