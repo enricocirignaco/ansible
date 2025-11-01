@@ -170,7 +170,8 @@ This repository is organized into modular Ansible roles:
 - [x] [debian_hardening](roles/debian_hardening/README.md) — Applies Debian-specific hardening policies and security configuration.  
 - [x] [network](roles/network/README.md) — Manages interface configuration and DNS. 
 - [x] [raspberry](roles/raspberry/README.md) — Applies Raspberry Pi-specific configurations.
-- [ ] [docker](roles/docker/README.md) — Installs and configures Docker Engine and container runtime settings.  
+- [x] [docker](roles/docker/README.md) — Installs and configures Docker Engine and container runtime settings.
+- [x] [komodo](roles/komodo/README.md) — Deploys and manages the Komodo stack using Docker Compose.  
 - [ ] [backup](roles/backup/README.md) — Configures automated backups and restore routines.  
 - [ ] [monitoring](roles/monitoring/README.md) — Sets up metrics, logging, and alerting for managed hosts.  
 - [x] [updates](roles/updates/README.md) — Handles automatic package updates and version pinning.  

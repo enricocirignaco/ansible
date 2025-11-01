@@ -25,6 +25,12 @@ Variables can be set in `defaults/main.yml`, overridden in `group_vars/` or `hos
 - `hostname`: Hostname to set 
   *Default*: `{{ inventory_hostname }}`
 
+- `common_admin_user`: Name of the privileged service account the role manages.
+  *Default*: `admin`
+- `common_admin_shell`: Login shell for the admin user. *Default*: `/bin/bash`
+- `common_admin_groups`: List of supplementary groups (e.g. `sudo`) the admin user should belong to.
+- `common_admin_authorized_keys`: List of SSH public keys to install into the admin user’s `authorized_keys`. This list is not optional.
+
 Dependencies
 ------------
 

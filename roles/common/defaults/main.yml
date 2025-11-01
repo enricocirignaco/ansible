@@ -9,3 +9,7 @@ common_base_packages:
   - git
   - sudo
 
+common_admin_user: admin
+common_admin_shell: /bin/bash
+common_admin_groups:
+  - sudo

@@ -19,7 +19,54 @@
     enabled: true
     state: started
   tags: [timesync, common]
+- name: Ensure admin user ssh keys list is defined
+  ansible.builtin.assert:
+    that:
+      - common_admin_authorized_keys is defined
+      - common_admin_authorized_keys is iterable
+    fail_msg: "common_admin_authorized_keys must be defined as a list of SSH public keys."
 
+- name: Ensure admin user exists
+  ansible.builtin.user:
+    name: "{{ common_admin_user }}"
+    shell: "{{ common_admin_shell }}"
+    groups: "{{ common_admin_groups | join(',') if common_admin_groups | length > 0 else omit }}"
+    append: true
+    state: present
+    create_home: true
+  tags: [users, common]
+
+- name: Ensure admin .ssh directory exists
+  ansible.builtin.file:
+    path: "/home/{{ common_admin_user }}/.ssh"
+    state: directory
+    owner: "{{ common_admin_user }}"
+    group: "{{ common_admin_user }}"
+    mode: "0700"
+  tags: [users, common, ssh]
+
+- name: Install admin authorized SSH keys
+  ansible.builtin.authorized_key:
+    user: "{{ common_admin_user }}"
+    key: "{{ item }}"
+    state: present
+  loop: "{{ common_admin_authorized_keys }}"
+  tags: [users, common, ssh]
+
+- name: lock password (no password login yet)
+  user:
+    name: "{{ common_admin_user }}"
+    password_lock: true
+- name: remind operator to set password
+  ansible.builtin.debug:
+    msg: |
+      The '{{ common_admin_user }}' user has been created.
+      You can now log in using your SSH key:
+        ssh {{ common_admin_user }}@{{ inventory_hostname }}
+      Once logged in, run:
+        sudo passwd {{ common_admin_user }}
+      to set a personal password.
+      
 - name: Ensure cron is enabled and running
   ansible.builtin.systemd:
     name: cron
