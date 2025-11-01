@@ -9,7 +9,7 @@ KOMODO_CORE_VERSION: "{{ komodo_core_version }}"
 KOMODO_PERIPHERY_VERSION: "{{ komodo_periphery_version }}"
 KOMODO_HOST: "{{ komodo_host_url }}"
 
-EXPOSE_DB_PORTS: "{{ komodo_expose_db_ports }}"
+EXPOSE_DB_PORTS: "{{ komodo_expose_db_ports | bool }}"
 TIMEZONE: "{{ komodo_timezone }}"
 KOMODO_BACKUPS_PATH: "{{ komodo_deployment_directory }}/backups"
 KOMODO_SYNCS_PATH: "{{ komodo_deployment_directory }}/syncs"

@@ -2,6 +2,23 @@
 ---
 # tasks file for roles/komodo
 
+- name: Validate required Komodo variables
+  ansible.builtin.assert:
+    that:
+      - komodo_deployment_directory is defined and komodo_deployment_directory | length > 0
+      - komodo_postgres_version is defined and komodo_postgres_version | length > 0
+      - komodo_ferretdb_version is defined and komodo_ferretdb_version | length > 0
+      - komodo_core_version is defined and komodo_core_version | length > 0
+      - komodo_periphery_version is defined and komodo_periphery_version | length > 0
+      - komodo_host_url is defined and komodo_host_url | length > 0
+      - komodo_secret_db_username is defined and komodo_secret_db_username | length > 0
+      - komodo_secret_db_password is defined and komodo_secret_db_password | length > 0
+      - komodo_secret_passkey is defined and komodo_secret_passkey | length > 0
+      - komodo_secret_webhook_secret is defined and komodo_secret_webhook_secret | length > 0
+      - komodo_secret_jwt_secret is defined and komodo_secret_jwt_secret | length > 0
+    fail_msg: "One or more required Komodo variables are undefined or empty. Set them via inventory or vault before running this role."
+    quiet: true
+
 - name: Ensure Komodo compose directory exists
   ansible.builtin.file:
     path: "{{ komodo_deployment_directory }}"
@@ -23,8 +40,8 @@
 
 - name: Render Komodo docker compose file
   ansible.builtin.template:
-    src: compose.yaml.j2
-    dest: "{{ komodo_deployment_directory }}/compose.yaml"
+    src: docker-compose.yaml.j2
+    dest: "{{ komodo_deployment_directory }}/docker-compose.yaml"
     mode: "0644"
 
 - name: Ensure Komodo stack is running

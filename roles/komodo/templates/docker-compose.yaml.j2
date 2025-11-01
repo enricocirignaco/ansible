@@ -9,7 +9,7 @@ services:
     labels:
       komodo.skip: # Prevent Komodo from stopping with StopAllContainers
     restart: unless-stopped
-    {% if EXPOSE_DB_PORTS | default(false) %}
+    {% if EXPOSE_DB_PORTS | default(false) | string | lower in ['true', '1', 'yes'] %}
       ports:
         - 5432:5432
     {% endif %}
@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
-    {% if EXPOSE_DB_PORTS | default(false) %}
+    {% if EXPOSE_DB_PORTS | default(false) | string | lower in ['true', '1', 'yes'] %}
       ports:
         - 27017:27017
     {% endif %}
