@@ -11,7 +11,6 @@
 # komodo_host_url
 
 # Optional variables with default values:
-komodo_expose_db_ports: false
 komodo_timezone: "Europe/Zurich"
 
 # Secret variables that should be set securely:

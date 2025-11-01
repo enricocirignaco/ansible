@@ -4,12 +4,13 @@
   become: true
   gather_facts: true
   roles:
-    - debian-update
+    # - debian-update
     # - common
     # - raspberry
     # - debian_hardening
     # - network
     # - docker
+    - komodo
   vars:
     system_update_mode: "full"
     hostname: "srvprod01"
@@ -27,4 +28,11 @@
     network_address: "192.168.1.128/24"
     network_gateway: "192.168.1.1"
     network_dns: ["127.0.0.1", "192.168.1.126"]
-  
+    komodo_deployment_directory: "/srv/komodo"
+    komodo_postgres_version: "17-0.106.0-ferretdb-2.5.0"
+    komodo_ferretdb_version: "2.5.0"
+    komodo_core_version: "1.19.5"
+    komodo_periphery_version: "1.19.5"
+    komodo_host_url: "https://komodo.casa"
+  vars_files:
+    - ../inventory/group_vars/prod-vault.yaml

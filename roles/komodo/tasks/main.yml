@@ -38,11 +38,21 @@
     label: "{{ item }}"
   when: item is not none and item | length > 0
 
-- name: Render Komodo docker compose file
-  ansible.builtin.template:
-    src: docker-compose.yaml.j2
+- name: Copy Komodo docker compose file
+  ansible.builtin.copy:
+    src: docker-compose.yaml
     dest: "{{ komodo_deployment_directory }}/docker-compose.yaml"
-    mode: "0644"
+    owner: root
+    group: root
+    mode: "0640"
+
+- name: Render Komodo environment file
+  ansible.builtin.template:
+    src: komodo.env.j2
+    dest: "{{ komodo_deployment_directory }}/.env"
+    owner: root
+    group: root
+    mode: "0600"
 
 - name: Ensure Komodo stack is running
   community.docker.docker_compose_v2:

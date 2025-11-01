@@ -5,8 +5,9 @@ Deploys the Komodo Core, FerretDB, and Postgres stack using Docker Compose. The 
 
 - validates that all required version pins, host settings, and secrets are provided
 - creates the deployment, data, and periphery directories
-- renders `docker-compose.yaml` from the provided variables
-- applies the stack with `community.docker.docker_compose`
+- installs a static `docker-compose.yaml` (and optional override) from the role’s `files/`
+- renders a `.env` file containing all runtime variables with restrictive permissions
+- applies the stack with `community.docker.docker_compose_v2`
 
 Requirements
 ------------
@@ -34,8 +35,11 @@ The role asserts that each value is defined and non-empty before proceeding.
 
 ### Optional
 
-- `komodo_expose_db_ports` (default `false`): when true, publishes Postgres (5432) and FerretDB (27017) to the host.
 - `komodo_timezone` (default `"Europe/Zurich"`): injected into all services for scheduling and logging.
+- `komodo_first_server` (default `"https://periphery:8120"`): initial periphery endpoint Komodo offers during onboarding.
+- `komodo_jwt_ttl` (default `"1-day"`): JWT token lifetime.
+- `komodo_local_auth` (default `true`): enables Komodo’s local username/password login.
+- `periphery_ssl_enabled` (default `true`): enables TLS for the periphery container.
 
 Derived compose variables such as `KOMODO_BACKUPS_PATH`, `KOMODO_SYNCS_PATH`, and `PERIPHERY_PATH` are computed relative to `komodo_deployment_directory`.
 
@@ -76,7 +80,7 @@ Example Playbook
     - role: komodo
 ```
 
-The role renders `{{ komodo_deployment_directory }}/docker-compose.yaml` and ensures the stack is running. Backup archives and sync files are placed under `{{ komodo_deployment_directory }}/backups` and `{{ komodo_deployment_directory }}/syncs`; periphery state persists under `{{ komodo_deployment_directory }}/periphery`.
+The role copies `docker-compose.yaml`, renders `{{ komodo_deployment_directory }}/.env` with mode `0600`, and ensures the stack is running. Backup archives and sync files are placed under `{{ komodo_deployment_directory }}/backups` and `{{ komodo_deployment_directory }}/syncs`; periphery state persists under `{{ komodo_deployment_directory }}/periphery`.
 
 License
 -------

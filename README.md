@@ -176,3 +176,4 @@ This repository is organized into modular Ansible roles:
 - [x] [updates](roles/updates/README.md) — Handles automatic package updates and version pinning.  
 - [ ] remove pi user and create another user with sudo privileges
 You can navigate to each role’s folder to view its dedicated README and implementation details.
+TODO: add new user and disable default pi user
