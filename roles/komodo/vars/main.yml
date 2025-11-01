@@ -1,3 +1,22 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # vars file for roles/komodo
+
+# docker compose variables
+POSTGRES_VERSION: "{{ komodo_postgres_version }}"
+FERRETDB_VERSION: "{{ komodo_ferretdb_version }}"
+KOMODO_CORE_VERSION: "{{ komodo_core_version }}"
+KOMODO_PERIPHERY_VERSION: "{{ komodo_periphery_version }}"
+KOMODO_HOST: "{{ komodo_host_url }}"
+
+EXPOSE_DB_PORTS: "{{ komodo_expose_db_ports }}"
+TIMEZONE: "{{ komodo_timezone }}"
+KOMODO_BACKUPS_PATH: "{{ komodo_deployment_directory }}/backups"
+KOMODO_SYNCS_PATH: "{{ komodo_deployment_directory }}/syncs"
+PERIPHERY_PATH: "{{ komodo_deployment_directory }}/periphery"
+
+KOMODO_DB_USERNAME: "{{ komodo_secret_db_username }}"
+KOMODO_DB_PASSWORD: "{{ komodo_secret_db_password }}"
+KOMODO_PASSKEY: "{{ komodo_secret_passkey }}"
+KOMODO_WEBHOOK_SECRET: "{{ komodo_secret_webhook_secret }}"
+KOMODO_JWT_SECRET: "{{ komodo_secret_jwt_secret }}"
