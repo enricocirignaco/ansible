@@ -45,7 +45,7 @@
     mode: "0644"
 
 - name: Ensure Komodo stack is running
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ komodo_deployment_directory }}"
     state: present
-    pull: true
+    pull: always
