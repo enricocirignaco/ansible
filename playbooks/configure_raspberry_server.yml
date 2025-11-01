@@ -4,13 +4,13 @@
   become: true
   gather_facts: true
   roles:
-    # - debian-update
-    # common
+    - debian-update
+    - common
     - raspberry
-    # - debian_hardening
-    # - network
-    # - docker
-    # - komodo
+    - debian_hardening
+    - network
+    - docker
+    - komodo
   vars:
     system_update_mode: "full"
     common_admin_groups:

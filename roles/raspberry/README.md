@@ -19,7 +19,7 @@ Role Variables
   *Default*: `/boot/firmware/config.txt`
 - `raspberry_disable_pi_user`  
   When `true`, lock the legacy `pi` account and set its shell to `/usr/sbin/nologin`.  
-  *Default*: `true`
+  *Default*: `false`
 - `raspberry_expand_rootfs`  
   Controls whether `raspi-config --expand-rootfs` should run to grow the root filesystem.  
   *Default*: `false`
