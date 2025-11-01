@@ -5,14 +5,23 @@
   gather_facts: true
   roles:
     # - debian-update
-    # - common
+    - common
     # - raspberry
     # - debian_hardening
     # - network
     # - docker
-    - komodo
+    # - komodo
   vars:
     system_update_mode: "full"
+    common_admin_groups:
+      - adm
+      - dialout
+      - sudo
+      - plugdev
+      - netdev
+      - docker
+    common_admin_authorized_keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICHvfORDLKCBFhwwviIAY2RtARl3LclLIEVE1r7JCVMl"
     hostname: "srvprod01"
     hardening_disable_services: ["bluetooth"]
     ssh_allow_groups: ["admin", "sudo"]

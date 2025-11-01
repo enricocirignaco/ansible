@@ -19,17 +19,20 @@
     enabled: true
     state: started
   tags: [timesync, common]
-- name: Ensure admin user ssh keys list is defined
+
+- name: Validate admin authorized keys list
   ansible.builtin.assert:
     that:
       - common_admin_authorized_keys is defined
-      - common_admin_authorized_keys is iterable
-    fail_msg: "common_admin_authorized_keys must be defined as a list of SSH public keys."
+      - common_admin_authorized_keys | length > 0
+    fail_msg: "common_admin_authorized_keys must contain at least one SSH public key so the admin user can access the host."
+  tags: [users, common, ssh]
 
 - name: Ensure admin user exists
   ansible.builtin.user:
     name: "{{ common_admin_user }}"
     shell: "{{ common_admin_shell }}"
+    home: "{{ common_admin_home }}"
     groups: "{{ common_admin_groups | join(',') if common_admin_groups | length > 0 else omit }}"
     append: true
     state: present
@@ -38,11 +41,12 @@
 
 - name: Ensure admin .ssh directory exists
   ansible.builtin.file:
-    path: "/home/{{ common_admin_user }}/.ssh"
+    path: "{{ common_admin_home }}/.ssh"
     state: directory
     owner: "{{ common_admin_user }}"
     group: "{{ common_admin_user }}"
     mode: "0700"
+  when: common_admin_authorized_keys | length > 0
   tags: [users, common, ssh]
 
 - name: Install admin authorized SSH keys
@@ -51,22 +55,22 @@
     key: "{{ item }}"
     state: present
   loop: "{{ common_admin_authorized_keys }}"
+  when: common_admin_authorized_keys | length > 0
   tags: [users, common, ssh]
 
-- name: lock password (no password login yet)
-  user:
+- name: Lock admin password to enforce key-based login
+  ansible.builtin.user:
     name: "{{ common_admin_user }}"
     password_lock: true
-- name: remind operator to set password
+  tags: [users, common]
+
+- name: Remind operator to set admin password
   ansible.builtin.debug:
     msg: |
-      The '{{ common_admin_user }}' user has been created.
-      You can now log in using your SSH key:
-        ssh {{ common_admin_user }}@{{ inventory_hostname }}
-      Once logged in, run:
-        sudo passwd {{ common_admin_user }}
-      to set a personal password.
-      
+      '{{ common_admin_user }}' account is provisioned with SSH key access only.
+      After first login run: sudo passwd {{ common_admin_user }}
+  tags: [users, common]
+  
 - name: Ensure cron is enabled and running
   ansible.builtin.systemd:
     name: cron

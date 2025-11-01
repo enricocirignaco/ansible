@@ -11,5 +11,7 @@ common_base_packages:
 
 common_admin_user: admin
 common_admin_shell: /bin/bash
+common_admin_home: "/home/{{ common_admin_user }}"
 common_admin_groups:
   - sudo
+common_admin_authorized_keys: []
