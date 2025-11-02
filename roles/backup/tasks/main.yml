@@ -52,3 +52,51 @@
     state: mounted
   become: true
   tags: [backup, mount]
+
+# Setup snapshot backup
+
+# - name: Ensure state dir exists
+#   ansible.builtin.file:
+#     path: "{{ btrfs_state_dir }}"
+#     state: directory
+#     owner: root
+#     group: root
+#     mode: "0755"
+#   become: true
+
+# - name: Check if root path exists
+#   ansible.builtin.stat:
+#     path: "{{ btrfs_root }}"
+#   register: btrfs_root_stat
+
+# - name: Skip role if Btrfs root not found
+#   ansible.builtin.debug:
+#     msg: "backup: root {{ btrfs_root }} does not exist, skipping."
+#   when: not btrfs_root_stat.stat.exists
+#   tags: [btrfs, backup]
+
+# - name: Install backup script
+#   ansible.builtin.template:
+#     src: btrfs-backup.sh.j2
+#     dest: "{{ btrfs_backup_script }}"
+#     owner: root
+#     group: root
+#     mode: "0750"
+#   become: true
+#   when: btrfs_root_stat.stat.exists
+#   tags: [btrfs, backup]
+
+# - name: Configure cron for btrfs backup
+#   ansible.builtin.cron:
+#     name: "Btrfs 2-tier backup"
+#     user: root
+#     minute: "{{ btrfs_backup_cron_time.split()[0] }}"
+#     hour: "{{ btrfs_backup_cron_time.split()[1] }}"
+#     day: "{{ btrfs_backup_cron_time.split()[2] }}"
+#     month: "{{ btrfs_backup_cron_time.split()[3] }}"
+#     weekday: "{{ btrfs_backup_cron_time.split()[4] }}"
+#     job: "{{ btrfs_backup_script }}"
+#     state: "{{ 'present' if btrfs_backup_cron_enabled else 'absent' }}"
+#   become: true
+#   when: btrfs_root_stat.stat.exists
+#   tags: [btrfs, backup, cron]
