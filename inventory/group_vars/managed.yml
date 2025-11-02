@@ -1,3 +1,4 @@
 # group_vars/managed.yml
-user: ansible
-admin_user: pi
+ansible_user: ansible
+admin_user: admin
+ansible_ssh_private_key_file: "~/.ssh/id_ed25519_ansible"
