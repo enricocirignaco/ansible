@@ -12,6 +12,7 @@
 
 # Optional variables with default values:
 komodo_timezone: "Europe/Zurich"
+komodo_local_auth: true
 
 # Secret variables that should be set securely:
 # komodo_secret_db_username
