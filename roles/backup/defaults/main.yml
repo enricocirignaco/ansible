@@ -1,3 +1,13 @@
 #SPDX-License-Identifier: MIT-0
 ---
-# defaults file for roles/backup
+
+# NAS / SMB settings
+# not optional variables
+# backup_smb_share:
+# backup_smb_username:
+# backup_smb_password:
+
+backup_smb_mountpoint: "/mnt/backup"
+backup_smb_creds_file: "/root/.smb/credentials"
+backup_smb_uid: 1000
+backup_smb_gid: 1000

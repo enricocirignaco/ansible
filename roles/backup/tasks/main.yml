@@ -1,3 +1,54 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/backup
+
+- name: Ensure cifs/smb utilities are installed
+  ansible.builtin.apt:
+    name:
+      - cifs-utils
+    state: present
+    update_cache: yes
+  become: true
+  tags: [backup, smb]
+
+- name: Ensure SMB creds directory exists
+  ansible.builtin.file:
+    path: "{{ backup_smb_creds_file | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  become: true
+  tags: [backup, smb]
+
+- name: Write SMB credentials file
+  ansible.builtin.copy:
+    dest: "{{ backup_smb_creds_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      username={{ backup_smb_username }}
+      password={{ backup_smb_password }}
+  become: true
+  tags: [backup, smb]
+
+- name: Ensure local mountpoint exists
+  ansible.builtin.file:
+    path: "{{ backup_smb_mountpoint }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  tags: [backup, mount]
+
+- name: Ensure SMB share is mounted and persistent
+  ansible.posix.mount:
+    path: "{{ backup_smb_mountpoint }}"
+    src: "//{{ backup_smb_share }}"
+    fstype: cifs
+    opts: "{{ backup_smb_mount_opts }}"
+    state: mounted
+  become: true
+  tags: [backup, mount]

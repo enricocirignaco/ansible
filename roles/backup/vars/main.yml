@@ -1,3 +1,4 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # vars file for roles/backup
+backup_smb_mount_opts: "credentials={{ backup_smb_creds_file }},uid={{ backup_smb_uid }},gid={{ backup_smb_gid }},vers=3.0,_netdev"
