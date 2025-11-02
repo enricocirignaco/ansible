@@ -1,6 +1,6 @@
 ---
 - name: Apply baseline configuration to a new Raspberry Pi server after bootstrap
-  hosts: managed
+  hosts: home_lab_production
   become: true
   gather_facts: true
   roles:
@@ -12,6 +12,7 @@
     - docker
     - komodo
   vars:
+    ansible_skip_tags: reboot
     system_update_mode: "full"
     common_admin_groups:
       - adm
@@ -20,6 +21,7 @@
       - plugdev
       - netdev
       - docker
+    common_install_tailscale: true
     common_admin_authorized_keys:
       - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICHvfORDLKCBFhwwviIAY2RtARl3LclLIEVE1r7JCVMl"
     hostname: "srvprod01"
@@ -47,3 +49,10 @@
     komodo_host_url: "https://komodo.casa"
   vars_files:
     - ../inventory/group_vars/prod-vault.yaml
+
+  tasks:
+    - name: Trigger immediate reboot
+      ansible.builtin.command: /sbin/reboot
+      async: 1
+      poll: 0
+      become: true
