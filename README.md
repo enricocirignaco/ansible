@@ -174,7 +174,5 @@ This repository is organized into modular Ansible roles:
 - [x] [komodo](roles/komodo/README.md) — Deploys and manages the Komodo stack using Docker Compose.  
 - [ ] [backup](roles/backup/README.md) — Configures automated backups and restore routines.  
 - [ ] [monitoring](roles/monitoring/README.md) — Sets up metrics, logging, and alerting for managed hosts.  
-- [x] [updates](roles/updates/README.md) — Handles automatic package updates and version pinning.  
-- [ ] remove pi user and create another user with sudo privileges
+- [x] [updates](roles/updates/README.md) — Handles automatic package updates and version pinning.
 You can navigate to each role’s folder to view its dedicated README and implementation details.
-TODO: add new user and disable default pi user
