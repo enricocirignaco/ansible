@@ -1,6 +1,6 @@
 ---
 - name: Apply baseline configuration to a new Raspberry Pi server after bootstrap
-  hosts: home_lab_production
+  hosts: lab
   become: true
   gather_facts: true
   roles:
@@ -10,8 +10,6 @@
     - debian_hardening
     - network
     - docker
-    - komodo
-    - backup
   vars:
     system_update_mode: "full"
     common_admin_groups:
@@ -24,7 +22,7 @@
     common_install_tailscale: true
     common_admin_authorized_keys:
       - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICHvfORDLKCBFhwwviIAY2RtARl3LclLIEVE1r7JCVMl"
-    hostname: "srvprod01"
+    hostname: "srvlab01"
     raspberry_disable_pi_user: true
     raspberry_expand_rootfs: false
     hardening_disable_services: ["bluetooth"]
@@ -38,16 +36,9 @@
     ssh_client_alive_interval: 300
     ssh_client_alive_count_max: 2
     network_interface: "eth0"
-    network_address: "192.168.1.128/24"
+    network_address: "192.168.1.130/24"
     network_gateway: "192.168.1.1"
     network_dns: ["127.0.0.1", "192.168.1.126"]
-    komodo_deployment_directory: "/srv/komodo"
-    komodo_postgres_version: "17-0.106.0-ferretdb-2.5.0"
-    komodo_ferretdb_version: "2.5.0"
-    komodo_core_version: "1.19.5"
-    komodo_periphery_version: "1.19.5"
-    komodo_host_url: "https://komodo.casa"
-    backup_smb_share: "192.168.1.100/backup"
   vars_files:
     - ../inventory/group_vars/prod-vault.yaml
 
