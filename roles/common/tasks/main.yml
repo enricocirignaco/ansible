@@ -28,6 +28,15 @@
     fail_msg: "common_admin_authorized_keys must contain at least one SSH public key so the admin user can access the host."
   tags: [users, common, ssh]
 
+- name: Ensure admin supplemental groups exist
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+    system: true
+  loop: "{{ common_admin_groups }}"
+  when: common_admin_groups | length > 0
+  tags: [users, common]
+
 - name: Ensure admin user exists
   ansible.builtin.user:
     name: "{{ common_admin_user }}"
@@ -96,3 +105,18 @@
   ansible.builtin.apt:
     autoclean: true
   tags: [upgrade, common, clean]
+
+- name: Install Tailscale when requested
+  ansible.builtin.shell: curl -fsSL https://tailscale.com/install.sh | sh
+  args:
+    creates: /usr/sbin/tailscaled
+  when: common_install_tailscale | bool
+  tags: [tailscale, common]
+
+- name: Ensure tailscaled service is enabled and running
+  ansible.builtin.systemd:
+    name: tailscaled
+    enabled: true
+    state: started
+  when: common_install_tailscale | bool
+  tags: [tailscale, common]
