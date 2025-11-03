@@ -8,6 +8,7 @@ common_base_packages:
   - htop
   - git
   - sudo
+  - locales
 
 common_admin_user: admin
 common_admin_shell: /bin/bash
@@ -16,3 +17,5 @@ common_admin_groups:
   - sudo
 common_admin_authorized_keys: []
 common_install_tailscale: false
+common_system_locale: de_CH.UTF-8
+common_system_language: en_US.UTF-8

@@ -13,6 +13,17 @@
   when: hostname is defined and hostname != ""
   tags: [hostname, common]
 
+- name: Ensure 127.0.1.1 maps to hostname
+  ansible.builtin.blockinfile:
+    path: /etc/hosts
+    block: |
+      127.0.0.1   localhost
+      127.0.1.1   {{ hostname }}
+    insertafter: BOF
+    create: true
+  when: hostname is defined and hostname != ""
+  tags: [hostname, common]
+
 - name: Ensure system time sync service is enabled and running (systemd-timesyncd)
   ansible.builtin.systemd:
     name: systemd-timesyncd
@@ -114,3 +125,18 @@
     state: started
   when: common_install_tailscale | bool
   tags: [tailscale, common]
+
+- name: Ensure needed locales are generated
+  community.general.locale_gen:
+    name: "{{ locale }}"
+    state: present
+  loop: "{{ [common_system_locale, common_system_language | default('')] | reject('equalto', '') | list | unique }}"
+  loop_control:
+    loop_var: locale
+    label: "{{ locale }}"
+  tags: [locale, common]
+
+- name: Set default system locale
+  ansible.builtin.command: >
+    update-locale LANG={{ common_system_language }} LC_CTYPE={{ common_system_locale }}
+  changed_when: true
