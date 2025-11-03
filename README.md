@@ -160,7 +160,10 @@ Run specific tags:
 ```bash
 ansible-playbook playbooks/site.yml --tags hardening,network
 ```
-
+Run playbook on production server:
+```bash
+ ansible-playbook playbooks/raspberry_prod.yml --skip-tags reboot --ask-vault-pass
+```
 ---
 ## Roles
 
