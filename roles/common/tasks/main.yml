@@ -140,3 +140,10 @@
   ansible.builtin.command: >
     update-locale LANG={{ common_system_language }} LC_CTYPE={{ common_system_locale }}
   changed_when: true
+
+- name: Enable weekly Disk TRIM
+  ansible.builtin.systemd:
+    name: fstrim.timer
+    enabled: true
+    state: started
+  tags: [trim, common]
