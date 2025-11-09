@@ -1,0 +1,11 @@
+[Unit]
+Description=Run btrbk hourly
+
+[Timer]
+OnCalendar=hourly
+AccuracySec=5m
+Persistent=true
+Unit={{ btrbk_service_unit }}
+
+[Install]
+WantedBy=timers.target

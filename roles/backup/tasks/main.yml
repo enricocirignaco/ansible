@@ -53,50 +53,69 @@
   become: true
   tags: [backup, mount]
 
-# Setup snapshot backup
 
-# - name: Ensure state dir exists
-#   ansible.builtin.file:
-#     path: "{{ btrfs_state_dir }}"
-#     state: directory
-#     owner: root
-#     group: root
-#     mode: "0755"
-#   become: true
+## BTRBK setup
 
-# - name: Check if root path exists
-#   ansible.builtin.stat:
-#     path: "{{ btrfs_root }}"
-#   register: btrfs_root_stat
+- name: Ensure btrbk package is installed
+  ansible.builtin.apt:
+    name: btrbk
+    state: present
+    update_cache: yes
+  become: true
+  tags: [backup, btrbk]
 
-# - name: Skip role if Btrfs root not found
-#   ansible.builtin.debug:
-#     msg: "backup: root {{ btrfs_root }} does not exist, skipping."
-#   when: not btrfs_root_stat.stat.exists
-#   tags: [btrfs, backup]
+- name: Ensure btrbk config directory exists
+  ansible.builtin.file:
+    path: "{{ btrbk_conf_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  tags: [backup, btrbk]
 
-# - name: Install backup script
-#   ansible.builtin.template:
-#     src: btrfs-backup.sh.j2
-#     dest: "{{ btrfs_backup_script }}"
-#     owner: root
-#     group: root
-#     mode: "0750"
-#   become: true
-#   when: btrfs_root_stat.stat.exists
-#   tags: [btrfs, backup]
+- name: Deploy btrbk configuration
+  ansible.builtin.copy:
+    src: btrbk.conf
+    dest: "{{ btrbk_conf_path }}"
+    owner: root
+    group: root
+    mode: "0640"
+  notify: Restart btrbk timer
+  become: true
+  tags: [backup, btrbk]
 
-# - name: Configure cron for btrfs backup
-#   ansible.builtin.cron:
-#     name: "Btrfs 2-tier backup"
-#     user: root
-#     minute: "{{ btrfs_backup_cron_time.split()[0] }}"
-#     hour: "{{ btrfs_backup_cron_time.split()[1] }}"
-#     day: "{{ btrfs_backup_cron_time.split()[2] }}"
-#     month: "{{ btrfs_backup_cron_time.split()[3] }}"
-#     weekday: "{{ btrfs_backup_cron_time.split()[4] }}"
-#     job: "{{ btrfs_backup_script }}"
-#     state: "{{ 'present' if btrfs_backup_cron_enabled else 'absent' }}"
-#   become: true
-#   when: btrfs_root_stat.stat.exists
-#   tags: [btrfs, backup, cron]
+- name: Install btrbk systemd service unit
+  ansible.builtin.template:
+    src: btrbk-hourly.service.j2
+    dest: "/etc/systemd/system/{{ btrbk_service_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd daemon
+    - Restart btrbk timer
+  become: true
+  tags: [backup, btrbk]
+
+- name: Install btrbk systemd timer unit
+  ansible.builtin.template:
+    src: btrbk-hourly.timer.j2
+    dest: "/etc/systemd/system/{{ btrbk_timer_unit }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Reload systemd daemon
+    - Restart btrbk timer
+  become: true
+  tags: [backup, btrbk]
+
+- name: Enable and start btrbk timer
+  ansible.builtin.systemd:
+    name: "{{ btrbk_timer_unit }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true
+  tags: [backup, btrbk]

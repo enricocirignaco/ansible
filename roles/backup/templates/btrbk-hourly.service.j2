@@ -1,0 +1,13 @@
+[Unit]
+Description=Run btrbk backups (hourly)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/btrbk run --config {{ btrbk_conf_path }}
+Nice=10
+IOSchedulingClass=idle
+
+[Install]
+WantedBy=multi-user.target

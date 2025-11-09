@@ -11,3 +11,8 @@ backup_smb_mountpoint: "/mnt/backup"
 backup_smb_creds_file: "/root/.smb/credentials"
 backup_smb_uid: 1000
 backup_smb_gid: 1000
+
+# btrbk configuration
+btrbk_conf_path: /etc/btrbk/btrbk.conf
+btrbk_service_unit: btrbk-hourly.service
+btrbk_timer_unit: btrbk-hourly.timer

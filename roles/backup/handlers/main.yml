@@ -1,3 +1,14 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # handlers file for roles/backup
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: Restart btrbk timer
+  ansible.builtin.systemd:
+    name: "{{ btrbk_timer_unit }}"
+    state: restarted
+  become: true
