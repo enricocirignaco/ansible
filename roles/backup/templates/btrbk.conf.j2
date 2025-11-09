@@ -6,7 +6,7 @@ timestamp_format      long
 snapshot_preserve     2d
 
 # ----- SOURCE VOLUME -----
-volume /mnt/btrfs-root
+volume {{ backup_btrbk_volume_root }}
   subvolume @       root
   subvolume @home   home
 
@@ -15,7 +15,7 @@ volume /mnt/btrfs-root
 
   # ---- Tier 2: export send-streams to NAS directory ----
   # Write compressed .btrfs.zst streams into a directory (SMB mount)
-  target /mnt/backup/raspberry
+  target {{ backup_btrbk_target_path }}
     target_preserve  2d
     target_type           file
     stream_compress       zstd

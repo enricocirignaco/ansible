@@ -9,6 +9,6 @@
 
 - name: Restart btrbk timer
   ansible.builtin.systemd:
-    name: "{{ btrbk_timer_unit }}"
+    name: "{{ backup_btrbk_timer_unit }}"
     state: restarted
   become: true

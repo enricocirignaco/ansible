@@ -56,6 +56,16 @@
 
 ## BTRBK setup
 
+- name: Ensure btrbk target directory exists
+  ansible.builtin.file:
+    path: "{{ backup_btrbk_target_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  tags: [backup, btrbk]
+
 - name: Ensure btrbk package is installed
   ansible.builtin.apt:
     name: btrbk
@@ -66,7 +76,7 @@
 
 - name: Ensure btrbk config directory exists
   ansible.builtin.file:
-    path: "{{ btrbk_conf_path | dirname }}"
+    path: "{{ backup_btrbk_conf_path | dirname }}"
     state: directory
     owner: root
     group: root
@@ -75,9 +85,9 @@
   tags: [backup, btrbk]
 
 - name: Deploy btrbk configuration
-  ansible.builtin.copy:
-    src: btrbk.conf
-    dest: "{{ btrbk_conf_path }}"
+  ansible.builtin.template:
+    src: btrbk.conf.j2
+    dest: "{{ backup_btrbk_conf_path }}"
     owner: root
     group: root
     mode: "0640"
@@ -88,7 +98,7 @@
 - name: Install btrbk systemd service unit
   ansible.builtin.template:
     src: btrbk-hourly.service.j2
-    dest: "/etc/systemd/system/{{ btrbk_service_unit }}"
+    dest: "/etc/systemd/system/{{ backup_btrbk_service_unit }}"
     owner: root
     group: root
     mode: "0644"
@@ -101,7 +111,7 @@
 - name: Install btrbk systemd timer unit
   ansible.builtin.template:
     src: btrbk-hourly.timer.j2
-    dest: "/etc/systemd/system/{{ btrbk_timer_unit }}"
+    dest: "/etc/systemd/system/{{ backup_btrbk_timer_unit }}"
     owner: root
     group: root
     mode: "0644"
@@ -113,7 +123,7 @@
 
 - name: Enable and start btrbk timer
   ansible.builtin.systemd:
-    name: "{{ btrbk_timer_unit }}"
+    name: "{{ backup_btrbk_timer_unit }}"
     enabled: true
     state: started
     daemon_reload: true
