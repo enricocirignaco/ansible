@@ -15,6 +15,7 @@ KOMODO_SYNCS_PATH: "{{ komodo_deployment_directory }}/syncs"
 PERIPHERY_PATH: "{{ komodo_deployment_directory }}/periphery"
 CERTIFICATES_PATH: "{{ komodo_deployment_directory }}/certificates"
 KOMODO_LOCAL_AUTH: "{{ komodo_local_auth }}"
+KOMODO_DISABLE_CONFIRM_DIALOG: "{{ komodo_disable_confirm_dialog }}"
 
 KOMODO_DB_USERNAME: "{{ komodo_secret_db_username }}"
 KOMODO_DB_PASSWORD: "{{ komodo_secret_db_password }}"

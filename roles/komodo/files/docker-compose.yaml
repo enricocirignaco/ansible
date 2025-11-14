@@ -12,6 +12,8 @@ services:
       POSTGRES_PASSWORD: "${KOMODO_DATABASE_PASSWORD}"
       POSTGRES_DB: "postgres"
       TZ: "${TIMEZONE}"
+    networks:
+      - komodo
 
   ferretdb:
     image: "ghcr.io/ferretdb/ferretdb:${FERRETDB_VERSION}"
@@ -25,13 +27,15 @@ services:
     environment:
       FERRETDB_POSTGRESQL_URL: "postgres://${KOMODO_DATABASE_USERNAME}:${KOMODO_DATABASE_PASSWORD}@postgres:5432/postgres"
       TZ: "${TIMEZONE}"
+    networks:
+      - komodo
 
   core:
     image: "ghcr.io/moghtech/komodo-core:${KOMODO_CORE_VERSION}"
     labels:
       komodo.skip:
       caddy: ${KOMODO_HOST}
-      caddy.reverse_proxy: "{{upstreams 80}}"
+      caddy.reverse_proxy: "{{upstreams 9120}}"
       caddy.tls: internal
     restart: unless-stopped
     depends_on:
@@ -46,6 +50,9 @@ services:
       - "${KOMODO_BACKUPS_PATH}:/backups"
       - "${KOMODO_SYNCS_PATH}:/syncs"
       - "${CERTIFICATES_PATH}:/usr/local/share/ca-certificates/"
+    networks:
+      - caddy
+      - komodo
 
   periphery:
     image: "ghcr.io/moghtech/komodo-periphery:${KOMODO_PERIPHERY_VERSION}"
@@ -58,7 +65,14 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/proc:/proc"
       - "${PERIPHERY_PATH}:${PERIPHERY_PATH}"
+    networks:
+      - komodo
 
 volumes:
   postgres-data:
   ferretdb-state:
+
+networks:
+  komodo:
+  caddy:
+    external: true

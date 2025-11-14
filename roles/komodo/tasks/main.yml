@@ -78,6 +78,11 @@
   when: komodo_trusted_certs.matched | default(0) > 0
   become: true
 
+- name: ensure caddy network exists
+  community.docker.docker_network:
+    name: caddy
+    state: present
+    
 - name: Ensure Komodo stack is running
   community.docker.docker_compose_v2:
     project_src: "{{ komodo_deployment_directory }}"
