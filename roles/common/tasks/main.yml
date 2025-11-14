@@ -147,3 +147,28 @@
     enabled: true
     state: started
   tags: [trim, common]
+
+- name: Ensure directory for trusted certificates exists
+  ansible.builtin.file:
+    path: /usr/local/share/ca-certificates/self-signed
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  tags: [certificates, common]
+
+- name: Install trusted certificates
+  ansible.builtin.copy:
+    src: root.crt
+    dest: /usr/local/share/ca-certificates/self-signed/root.crt
+    owner: root
+    group: root
+    mode: "0644"
+  register: custom_ca_cert
+  tags: [certificates, common]
+
+- name: Update CA certificates
+  ansible.builtin.command: update-ca-certificates
+  when: custom_ca_cert is changed
+  changed_when: true
+  tags: [certificates, common]

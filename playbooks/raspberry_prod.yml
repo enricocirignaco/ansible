@@ -46,7 +46,7 @@
     komodo_ferretdb_version: "2.5.0"
     komodo_core_version: "1.19.5"
     komodo_periphery_version: "1.19.5"
-    komodo_host_url: "https://komodo.casa"
+    komodo_host_url: "komodo.casa"
     backup_smb_share: "192.168.1.100/backup"
   vars_files:
     - ../inventory/group_vars/prod-vault.yaml

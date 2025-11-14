@@ -9,6 +9,7 @@ common_base_packages:
   - git
   - sudo
   - locales
+  - ca-certificates
 
 common_admin_user: admin
 common_admin_shell: /bin/bash
