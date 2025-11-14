@@ -12,9 +12,14 @@ backup_smb_creds_file: "/root/.smb/credentials"
 backup_smb_uid: 1000
 backup_smb_gid: 1000
 
-# btrbk configuration
-backup_btrbk_conf_path: /etc/btrbk/btrbk.conf
-backup_btrbk_service_unit: btrbk-hourly.service
-backup_btrbk_timer_unit: btrbk-hourly.timer
-backup_btrbk_volume_root: /mnt/btrfs-root
-backup_btrbk_target_path: "{{ backup_smb_mountpoint }}/{{ hostname | default(inventory_hostname) }}/snapshots"
+# snapshot script configuration
+backup_snapshot_script_path: /usr/local/sbin/backup-snapshot.sh
+backup_snapshot_source: /
+backup_snapshot_local_path: /.snapshots
+backup_snapshot_remote_path: "{{ backup_smb_mountpoint }}/{{ hostname | default(inventory_hostname) }}/snapshots"
+backup_snapshot_retention: 3
+
+# cron configuration
+backup_snapshot_cron_minute: "0"
+backup_snapshot_cron_hour: "2"
+backup_snapshot_cron_user: root

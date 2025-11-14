@@ -2,13 +2,3 @@
 ---
 # handlers file for roles/backup
 
-- name: Reload systemd daemon
-  ansible.builtin.systemd:
-    daemon_reload: true
-  become: true
-
-- name: Restart btrbk timer
-  ansible.builtin.systemd:
-    name: "{{ backup_btrbk_timer_unit }}"
-    state: restarted
-  become: true

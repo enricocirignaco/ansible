@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Managed by Ansible - basic Btrfs snapshot, stream, and prune workflow.
+
+set -euo pipefail
+shopt -s nullglob
+
+SOURCE="{{ backup_snapshot_source }}"
+LOCAL_DIR="{{ backup_snapshot_local_path }}"
+REMOTE_DIR="{{ backup_snapshot_remote_path }}"
+REMOTE_EXTENSION=".btrfs.zst"
+RETENTION={{ backup_snapshot_retention | int }}
+NAS_MOUNTPOINT="{{ backup_smb_mountpoint }}"
+
+timestamp="$(date +%Y%m%d%H%M%S)"
+snapshot_name="snapshot-${timestamp}"
+local_snapshot="${LOCAL_DIR}/${snapshot_name}"
+remote_archive="${REMOTE_DIR}/${snapshot_name}${REMOTE_EXTENSION}"
+tmp_archive="${remote_archive}.tmp"
+
+{% raw %}
+if (( RETENTION < 1 )); then
+  RETENTION=1
+fi
+
+echo "[$(date --iso-8601=seconds)] Stage 1: prepare directories and verify NAS mount"
+mkdir -p "$LOCAL_DIR" "$REMOTE_DIR"
+if ! mountpoint -q "${NAS_MOUNTPOINT}"; then
+  echo "[$(date --iso-8601=seconds)] NAS mountpoint ${NAS_MOUNTPOINT} is not mounted"
+  exit 1
+fi
+
+echo "[$(date --iso-8601=seconds)] Stage 2: create readonly snapshot ${local_snapshot}"
+btrfs subvolume snapshot -r "$SOURCE" "$local_snapshot"
+
+echo "[$(date --iso-8601=seconds)] Stage 3: stream snapshot to NAS archive ${remote_archive}"
+if btrfs send "$local_snapshot" | zstd -q -T0 > "$tmp_archive"; then
+  mv "$tmp_archive" "$remote_archive"
+else
+  echo "[$(date --iso-8601=seconds)] ERROR: snapshot streaming failed"
+  rm -f "$tmp_archive"
+  exit 1
+fi
+
+echo "[$(date --iso-8601=seconds)] Stage 4: prune old local snapshots"
+mapfile -t local_snapshots < <(printf '%s\n' "${LOCAL_DIR}"/snapshot-* 2>/dev/null | sort || true)
+while ((${#local_snapshots[@]} > RETENTION)); do
+  oldest="${local_snapshots[0]}"
+  echo "[$(date --iso-8601=seconds)] Removing local snapshot ${oldest}"
+  btrfs subvolume delete -- "$oldest"
+  local_snapshots=("${local_snapshots[@]:1}")
+done
+
+echo "[$(date --iso-8601=seconds)] Stage 5: prune old NAS archives"
+mapfile -t remote_archives < <(printf '%s\n' "${REMOTE_DIR}"/snapshot-*${REMOTE_EXTENSION} 2>/dev/null | sort || true)
+while ((${#remote_archives[@]} > RETENTION)); do
+  oldest="${remote_archives[0]}"
+  echo "[$(date --iso-8601=seconds)] Removing NAS archive ${oldest}"
+  rm -f -- "$oldest"
+  remote_archives=("${remote_archives[@]:1}")
+done
+
+echo "[$(date --iso-8601=seconds)] Done - snapshot ${snapshot_name}"
+{% endraw %}

@@ -54,78 +54,63 @@
   tags: [backup, mount]
 
 
-## BTRBK setup
-
-- name: Ensure btrbk target directory exists
-  ansible.builtin.file:
-    path: "{{ backup_btrbk_target_path }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  become: true
-  tags: [backup, btrbk]
-
-- name: Ensure btrbk package is installed
+- name: Ensure snapshot dependencies are installed
   ansible.builtin.apt:
-    name: btrbk
+    name:
+      - btrfs-progs
+      - zstd
     state: present
     update_cache: yes
   become: true
-  tags: [backup, btrbk]
+  tags: [backup, snapshot]
 
-- name: Ensure btrbk config directory exists
+- name: Ensure local snapshot directory exists
   ansible.builtin.file:
-    path: "{{ backup_btrbk_conf_path | dirname }}"
+    path: "{{ backup_snapshot_local_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  become: true
+  tags: [backup, snapshot]
+
+- name: Ensure remote snapshot directory exists
+  ansible.builtin.file:
+    path: "{{ backup_snapshot_remote_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  become: true
+  tags: [backup, snapshot]
+
+- name: Ensure backup script directory exists
+  ansible.builtin.file:
+    path: "{{ backup_snapshot_script_path | dirname }}"
     state: directory
     owner: root
     group: root
     mode: "0755"
   become: true
-  tags: [backup, btrbk]
+  tags: [backup, snapshot]
 
-- name: Deploy btrbk configuration
+- name: Deploy snapshot script
   ansible.builtin.template:
-    src: btrbk.conf.j2
-    dest: "{{ backup_btrbk_conf_path }}"
+    src: backup-snapshot.sh.j2
+    dest: "{{ backup_snapshot_script_path }}"
     owner: root
     group: root
-    mode: "0640"
-  notify: Restart btrbk timer
+    mode: "0750"
   become: true
-  tags: [backup, btrbk]
+  tags: [backup, snapshot]
 
-- name: Install btrbk systemd service unit
-  ansible.builtin.template:
-    src: btrbk-hourly.service.j2
-    dest: "/etc/systemd/system/{{ backup_btrbk_service_unit }}"
-    owner: root
-    group: root
-    mode: "0644"
-  notify:
-    - Reload systemd daemon
-    - Restart btrbk timer
+- name: Schedule daily backup snapshot
+  ansible.builtin.cron:
+    name: "Daily snapshot backup"
+    user: "{{ backup_snapshot_cron_user }}"
+    minute: "{{ backup_snapshot_cron_minute }}"
+    hour: "{{ backup_snapshot_cron_hour }}"
+    job: "{{ backup_snapshot_script_path }} >> {{ backup_snapshot_log_path }} 2>&1"
+    state: present
   become: true
-  tags: [backup, btrbk]
-
-- name: Install btrbk systemd timer unit
-  ansible.builtin.template:
-    src: btrbk-hourly.timer.j2
-    dest: "/etc/systemd/system/{{ backup_btrbk_timer_unit }}"
-    owner: root
-    group: root
-    mode: "0644"
-  notify:
-    - Reload systemd daemon
-    - Restart btrbk timer
-  become: true
-  tags: [backup, btrbk]
-
-- name: Enable and start btrbk timer
-  ansible.builtin.systemd:
-    name: "{{ backup_btrbk_timer_unit }}"
-    enabled: true
-    state: started
-    daemon_reload: true
-  become: true
-  tags: [backup, btrbk]
+  tags: [backup, snapshot, cron]
