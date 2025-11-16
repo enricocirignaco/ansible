@@ -168,3 +168,7 @@
   loop: "{{ hardening_disable_services | default([]) }}"
   when: hardening_disable_services | default([]) | length > 0
   tags: [services, hardening]
+
+- import_tasks: persistent_logs.yml
+  when: debian_hardening_enable_persistent_logs | default(false)
+  tags: [journald, logging]

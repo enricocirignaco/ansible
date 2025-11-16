@@ -37,6 +37,7 @@
     ssh_login_grace_time: "30s"
     ssh_client_alive_interval: 300
     ssh_client_alive_count_max: 2
+    debian_hardening_enable_persistent_logs: true
     network_interface: "eth0"
     network_address: "192.168.1.128/24"
     network_gateway: "192.168.1.1"

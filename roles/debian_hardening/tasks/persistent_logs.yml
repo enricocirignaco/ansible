@@ -1,0 +1,65 @@
+# roles/debian_hardening/tasks/persistent_logs.yml
+
+- name: Ensure persistent journal directory exists
+  ansible.builtin.file:
+    path: /var/log/journal
+    state: directory
+    owner: root
+    group: systemd-journal
+    mode: "02755"
+  tags: [journald, logging]
+
+- name: Configure systemd-journald to use persistent storage
+  ansible.builtin.ini_file:
+    path: /etc/systemd/journald.conf
+    section: Journal
+    option: Storage
+    value: persistent
+    no_extra_spaces: true
+    state: present
+  notify: Restart systemd-journald
+  tags: [journald, logging]
+
+- name: Limit maximum disk usage for persistent journal
+  ansible.builtin.ini_file:
+    path: /etc/systemd/journald.conf
+    section: Journal
+    option: SystemMaxUse
+    value: {{ debian_hardening_logs_max_size | default("100M") }}
+    no_extra_spaces: true
+    state: present
+  notify: Restart systemd-journald
+  tags: [journald, logging]
+
+- name: Limit maximum disk usage for runtime journal (in /run)
+  ansible.builtin.ini_file:
+    path: /etc/systemd/journald.conf
+    section: Journal
+    option: RuntimeMaxUse
+    value: 5M
+    no_extra_spaces: true
+    state: present
+  notify: Restart systemd-journald
+  tags: [journald, logging]
+
+- name: Limit individual journal file size
+  ansible.builtin.ini_file:
+    path: /etc/systemd/journald.conf
+    section: Journal
+    option: SystemMaxFileSize
+    value: 25M
+    no_extra_spaces: true
+    state: present
+  notify: Restart systemd-journald
+  tags: [journald, logging]
+
+- name: Limit journal retention time
+  ansible.builtin.ini_file:
+    path: /etc/systemd/journald.conf
+    section: Journal
+    option: MaxRetentionSec
+    value: {{ debian_hardening_logs_retention | default("1month") }}
+    no_extra_spaces: true
+    state: present
+  notify: Restart systemd-journald
+  tags: [journald, logging]

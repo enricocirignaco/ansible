@@ -17,3 +17,7 @@ hardening_enable_weekly_upgrade: true
 
 # Optional service disables
 hardening_disable_services: []
+
+debian_hardening_logs_max_size: "100M"
+debian_hardening_logs_retention: "1month"
+debian_hardening_enable_persistent_logs: true
