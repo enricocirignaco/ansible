@@ -25,7 +25,7 @@
     path: /etc/systemd/journald.conf
     section: Journal
     option: SystemMaxUse
-    value: {{ debian_hardening_logs_max_size | default("100M") }}
+    value: "{{ debian_hardening_logs_max_size | default('100M') }}"
     no_extra_spaces: true
     state: present
   notify: Restart systemd-journald
@@ -58,7 +58,7 @@
     path: /etc/systemd/journald.conf
     section: Journal
     option: MaxRetentionSec
-    value: {{ debian_hardening_logs_retention | default("1month") }}
+    value: "{{ debian_hardening_logs_retention | default('1month') }}"
     no_extra_spaces: true
     state: present
   notify: Restart systemd-journald
