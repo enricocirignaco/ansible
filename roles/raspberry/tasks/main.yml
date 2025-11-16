@@ -53,6 +53,10 @@
   register: bootcfg_result
   tags: [raspberry]
 
+# configure hardware watchdog
+- import_tasks: hardware_watchdog.yml
+  tags: [raspberry, watchdog]
+
 - name: Disable legacy pi user when requested
   ansible.builtin.user:
     name: pi
@@ -62,23 +66,6 @@
   become: true
   when: raspberry_disable_pi_user | bool
   tags: [raspberry, users]
-
-# Start watchdog service
-- name: Ensure watchdog package is installed
-  ansible.builtin.apt:
-    name: watchdog
-    state: present
-    update_cache: false
-  become: true
-  tags: [raspberry]
-
-- name: Enable watchdog service
-  ansible.builtin.systemd:
-    name: watchdog
-    enabled: true
-    state: started
-  become: true
-  tags: [raspberry]
 
 # Expand filesystem
 - name: Expand filesystem to full device size
