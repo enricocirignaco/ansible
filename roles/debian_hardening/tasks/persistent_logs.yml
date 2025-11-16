@@ -1,5 +1,25 @@
 # roles/debian_hardening/tasks/persistent_logs.yml
 
+# Override /usr/lib/systemd/journald.conf.d/40-rpi-volatile-storage.conf to enable persistent logs
+- name: Ensure journald drop-in dir exists
+  ansible.builtin.file:
+    path: /etc/systemd/journald.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Force persistent journald storage
+  ansible.builtin.copy:
+    dest: /etc/systemd/journald.conf.d/50-persistent.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [Journal]
+      Storage=persistent
+  notify: Restart systemd-journald
+
 - name: Ensure persistent journal directory exists
   ansible.builtin.file:
     path: /var/log/journal
