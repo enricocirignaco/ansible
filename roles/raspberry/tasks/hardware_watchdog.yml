@@ -1,52 +1,34 @@
 
-- name: Ensure watchdog package is installed
-  ansible.builtin.apt:
-    name: watchdog
-    state: present
-    update_cache: false
+- name: Ensure systemd manager drop-in dir exists
   become: true
-  tags: [raspberry, watchdog]
+  ansible.builtin.file:
+    path: /etc/systemd/system.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
 
-- name: Enable watchdog device
+- name: Configure systemd hardware watchdog
   become: true
-  ansible.builtin.lineinfile:
-    path: /etc/watchdog.conf
-    regexp: '^#?\s*watchdog-device'
-    line: 'watchdog-device		= /dev/watchdog'
-  notify: Restart watchdog
-  tags: [raspberry, watchdog]
+  ansible.builtin.copy:
+    dest: /etc/systemd/system.conf.d/50-watchdog.conf
+    owner: root
+    group: root
+    mode: '0644'
+    content: |
+      [Manager]
+      RuntimeWatchdogSec=15s
+      ShutdownWatchdogSec=1min
+  notify: Reload systemd manager
 
-- name: Set watchdog interval
+- name: Disable and mask legacy watchdog daemons
   become: true
-  ansible.builtin.lineinfile:
-    path: /etc/watchdog.conf
-    regexp: '^#?\s*interval'
-    line: 'interval		= 5'
-  notify: Restart watchdog
-  tags: [raspberry, watchdog]
-
-- name: Enable max-load-1 check
-  become: true
-  ansible.builtin.lineinfile:
-    path: /etc/watchdog.conf
-    regexp: '^#?\s*max-load-1'
-    line: 'max-load-1		= 24'
-  notify: Restart watchdog
-  tags: [raspberry, watchdog]
-
-- name: Enable min-memory check
-  become: true
-  ansible.builtin.lineinfile:
-    path: /etc/watchdog.conf
-    regexp: '^#?\s*min-memory'
-    line: 'min-memory		= 1'
-  notify: Restart watchdog
-  tags: [raspberry, watchdog]
-
-- name: Ensure watchdog service is enabled and running
-  become: true
-  ansible.builtin.service:
-    name: watchdog
-    enabled: true
-    state: started
-  tags: [raspberry, watchdog]
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+    masked: true
+  loop:
+    - watchdog
+    - wd_keepalive
+  ignore_errors: true   # in case package isn't installed
