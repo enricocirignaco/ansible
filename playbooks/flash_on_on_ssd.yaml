@@ -1,0 +1,127 @@
+---
+- name: Prepare SSD and clone Raspberry Pi OS from SD
+  hosts: rpi
+  become: true
+  vars:
+    # The disk you want to turn into the main OS disk
+    target_disk: "/dev/nvme0n1"
+
+    # Partition sizing (must fit on your "standard" SD size)
+    boot_size_mb: 256         # boot partition
+    root_size_gb: 28          # root partition
+    create_data_partition: true
+  
+  pre_tasks:
+    - name: Ensure Python 3 exists
+      raw: test -e /usr/bin/python3 || (apt update -y && apt install -y python3)
+      changed_when: false
+
+    - name: Gather facts now that Python is present
+      setup:
+
+    - name: Warn that the target disk will be wiped
+      debug:
+        msg: "About to partition and format {{ target_disk }} - ALL DATA ON THIS DISK WILL BE LOST."
+
+    - pause:
+        prompt: "Press Enter to continue, or Ctrl+C then 'A' to abort"
+
+  tasks:
+  # Download and install rpi-clone
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: present
+        update_cache: yes
+
+    - name: Check if rpi-clone is already installed
+      stat:
+        path: /usr/local/sbin/rpi-clone
+      register: rpi_clone_bin
+
+    - name: Clone rpi-clone repo
+      git:
+        repo: "https://github.com/jeffgeerling/rpi-clone.git"
+        dest: /tmp/rpi-clone
+        version: HEAD
+      when: not rpi_clone_bin.stat.exists
+
+    - name: Install rpi-clone binary
+      copy:
+        src: /tmp/rpi-clone/rpi-clone
+        dest: /usr/local/sbin/rpi-clone
+        owner: root
+        group: root
+        mode: "0755"
+      when: not rpi_clone_bin.stat.exists
+
+    # Partition and format target disk
+    - name: Create MBR partition table on target disk
+      parted:
+        device: "{{ target_disk }}"
+        label: msdos
+        state: present
+
+    - name: Create boot partition (p1)
+      parted:
+        device: "{{ target_disk }}"
+        number: 1
+        state: present
+        part_start: 1MiB
+        part_end: "{{ boot_size_mb }}MiB"
+        fs_type: fat32
+
+    - name: Create root partition (p2)
+      parted:
+        device: "{{ target_disk }}"
+        number: 2
+        state: present
+        part_start: "{{ boot_size_mb }}MiB"
+        part_end: "{{ (boot_size_mb / 1024.0) + root_size_gb }}GiB"
+        fs_type: ext4
+
+    - name: Create data partition (p3) if enabled
+      parted:
+        device: "{{ target_disk }}"
+        number: 3
+        state: present
+        part_start: "{{ (boot_size_mb / 1024.0) + root_size_gb }}GiB"
+        part_end: "100%"
+        fs_type: ext4
+      when: create_data_partition
+
+    - name: Refresh partition table
+      command: "partprobe {{ target_disk }}"
+
+    - name: Format boot partition
+      filesystem:
+        fstype: vfat
+        dev: "{{ target_disk }}1"
+
+    - name: Format root partition
+      filesystem:
+        fstype: ext4
+        dev: "{{ target_disk }}2"
+
+    - name: Format data partition
+      filesystem:
+        fstype: ext4
+        dev: "{{ target_disk }}3"
+      when: create_data_partition
+
+    # Setup boot order (NVMe/SSD first with SD as fallback)
+    - name: Ensure raspi-config is installed
+      apt:
+        name: raspi-config
+        state: present
+        update_cache: yes
+
+    - name: Set boot order
+      command: raspi-config nonint do_boot_order B2
+
+    # Clone from SD to SSD
+    - name: clone boot and root partitions to target disk
+      command: >
+        /usr/local/sbin/rpi-clone -p 1,2 -f {{ target_disk }}
+      environment:
+        LC_ALL: C
