@@ -1,16 +1,18 @@
 ---
+
+# Example usage:
+# ansible-playbook flash_os_on_ssd.yaml \
+#   -e target_disk=/dev/nvme0n1 \
+#   -e format_disk=true
+
 - name: Prepare SSD and clone Raspberry Pi OS from SD
   hosts: rpi
   become: true
   vars:
-    # The disk you want to turn into the main OS disk
-    target_disk: "/dev/nvme0n1"
-    target_data_partition: "{{ target_disk }}p3"
-    format_data_partition: true
-
-    # Partition sizing TODO: adjust as needed
-    boot_size_mb: 256         # boot partition
-    root_size_gb: 28          # root partition
+    # Defaults
+    boot_size_mb: 256
+    root_size_gb: 28
+    format_disk: false
   
   pre_tasks:
     - name: Ensure Python 3 exists
@@ -20,9 +22,24 @@
     - name: Gather facts now that Python is present
       setup:
 
-    - name: Warn that the target disk will be wiped
+    - name: Ensure target_disk is provided
+      assert:
+        that:
+          - target_disk | default('', true) | length > 0
+        fail_msg: "You must set target_disk (e.g. -e target_disk=/dev/nvme0n1) before running this playbook."
+
+    - name: Interactive user warning and confirmation
       debug:
-        msg: "About to partition and format {{ target_disk }} - ALL DATA ON THIS DISK WILL BE LOST."
+        msg: |
+          This playbook will prepare the target disk {{ target_disk }} and clone the Raspberry Pi OS installation from the SD card to the SSD.
+          Current variable values:
+            target_disk = {{ target_disk }}
+            boot_size_mb = {{ boot_size_mb }}
+            root_size_gb = {{ root_size_gb }}
+            format_disk = {{ format_disk }}
+          IMPORTANT:
+            - If format_disk == true: ALL DATA on {{ target_disk }} WILL BE LOST (partition table + all partitions will be recreated).
+            - If format_disk == false: Existing partitions are kept, but partitions 1 and 2 will be overwritten by rpi-clone.
 
     - pause:
         prompt: "Press Enter to continue, or Ctrl+C then 'A' to abort"
@@ -57,11 +74,12 @@
       when: not rpi_clone_bin.stat.exists
 
     # Partition target disk
-    - name: Create MBR partition table on target disk
+    - name: Create MBR partition table on target disk (will erase all data)
       parted:
         device: "{{ target_disk }}"
         label: msdos
         state: present
+      when: format_disk is true
 
     - name: Create boot partition (p1)
       parted:
@@ -71,6 +89,7 @@
         part_start: 1MiB
         part_end: "{{ boot_size_mb }}MiB"
         fs_type: fat32
+      when: format_disk is true
 
     - name: Create root partition (p2)
       parted:
@@ -80,6 +99,7 @@
         part_start: "{{ boot_size_mb }}MiB"
         part_end: "{{ (boot_size_mb / 1024.0) + root_size_gb }}GiB"
         fs_type: ext4
+      when: format_disk is true
 
     - name: Create data partition (p3) if specified
       parted:
@@ -89,18 +109,12 @@
         part_start: "{{ (boot_size_mb / 1024.0) + root_size_gb }}GiB"
         part_end: "100%"
         fs_type: ext4
-      when: target_data_partition is defined and target_data_partition != ""
+      when:
+        - format_disk is true
 
     - name: Refresh partition table
       command: "partprobe {{ target_disk }}"
-
-    - name: Format data partition if required
-      filesystem:
-        fstype: ext4
-        dev: "{{ target_data_partition }}"
-      when:
-        - format_data_partition is true
-        - target_data_partition is defined and target_data_partition != ""
+      changed_when: false
 
     # Setup boot order (NVMe/SSD first with SD as fallback)
     - name: Ensure raspi-config is installed
@@ -113,9 +127,10 @@
       command: raspi-config nonint do_boot_order B2
 
     # Clone from SD to SSD
-    - name: clone boot and root partitions to target disk
-      command: >
-        /usr/local/sbin/rpi-clone -p 1,2 {{ target_disk }}
+    - name: Clone boot and root to target disk (overwrite partitions 1 and 2)
+      shell: yes | /usr/local/sbin/rpi-clone -p 1,2 {{ target_disk }}
+      args:
+        executable: /bin/bash
       environment:
         LC_ALL: C
 
