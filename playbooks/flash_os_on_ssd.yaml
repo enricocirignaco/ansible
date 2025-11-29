@@ -5,15 +5,16 @@
   vars:
     # The disk you want to turn into the main OS disk
     target_disk: "/dev/nvme0n1"
+    target_data_partition: "{{ target_disk }}p3"
+    format_data_partition: true
 
-    # Partition sizing (must fit on your "standard" SD size)
+    # Partition sizing TODO: adjust as needed
     boot_size_mb: 256         # boot partition
     root_size_gb: 28          # root partition
-    create_data_partition: true
   
   pre_tasks:
     - name: Ensure Python 3 exists
-      raw: test -e /usr/bin/python3 || (apt update -y && apt install -y python3)
+      raw: test -e /usr/bin/python3 || (apt-get update -y && apt-get install -y python3)
       changed_when: false
 
     - name: Gather facts now that Python is present
@@ -55,7 +56,7 @@
         mode: "0755"
       when: not rpi_clone_bin.stat.exists
 
-    # Partition and format target disk
+    # Partition target disk
     - name: Create MBR partition table on target disk
       parted:
         device: "{{ target_disk }}"
@@ -80,7 +81,7 @@
         part_end: "{{ (boot_size_mb / 1024.0) + root_size_gb }}GiB"
         fs_type: ext4
 
-    - name: Create data partition (p3) if enabled
+    - name: Create data partition (p3) if specified
       parted:
         device: "{{ target_disk }}"
         number: 3
@@ -88,26 +89,18 @@
         part_start: "{{ (boot_size_mb / 1024.0) + root_size_gb }}GiB"
         part_end: "100%"
         fs_type: ext4
-      when: create_data_partition
+      when: target_data_partition is defined and target_data_partition != ""
 
     - name: Refresh partition table
       command: "partprobe {{ target_disk }}"
 
-    - name: Format boot partition
-      filesystem:
-        fstype: vfat
-        dev: "{{ target_disk }}1"
-
-    - name: Format root partition
+    - name: Format data partition if required
       filesystem:
         fstype: ext4
-        dev: "{{ target_disk }}2"
-
-    - name: Format data partition
-      filesystem:
-        fstype: ext4
-        dev: "{{ target_disk }}3"
-      when: create_data_partition
+        dev: "{{ target_data_partition }}"
+      when:
+        - format_data_partition is true
+        - target_data_partition is defined and target_data_partition != ""
 
     # Setup boot order (NVMe/SSD first with SD as fallback)
     - name: Ensure raspi-config is installed
@@ -122,6 +115,9 @@
     # Clone from SD to SSD
     - name: clone boot and root partitions to target disk
       command: >
-        /usr/local/sbin/rpi-clone -p 1,2 -f {{ target_disk }}
+        /usr/local/sbin/rpi-clone -p 1,2 {{ target_disk }}
       environment:
         LC_ALL: C
+
+    - name: Refresh partition table after cloning
+      command: "partprobe {{ target_disk }}"
