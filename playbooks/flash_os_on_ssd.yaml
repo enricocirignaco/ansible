@@ -1,18 +1,17 @@
 ---
 
 # Example usage:
-# ansible-playbook flash_os_on_ssd.yaml \
-#   -e target_disk=/dev/nvme0n1 \
-#   -e format_disk=true
+# ansible-playbook flash_os_on_ssd.yaml -i 'admin@bootstrap,' -e target_disk=/dev/nvme0n1 -e format_disk=true
 
 - name: Prepare SSD and clone Raspberry Pi OS from SD
-  hosts: rpi
+  hosts: all
   become: true
   vars:
     # Defaults
     boot_size_mb: 256
     root_size_gb: 28
     format_disk: false
+    ansible_python_interpreter: /usr/bin/python3
   
   pre_tasks:
     - name: Ensure Python 3 exists
@@ -22,11 +21,20 @@
     - name: Gather facts now that Python is present
       setup:
 
-    - name: Ensure target_disk is provided
+    - name: Check if target_disk was provided
       assert:
         that:
           - target_disk | default('', true) | length > 0
-        fail_msg: "You must set target_disk (e.g. -e target_disk=/dev/nvme0n1) before running this playbook."
+        fail_msg: |
+          No target_disk was specified.
+          
+          Available disks on this Raspberry Pi:
+          {% for dev in ansible_devices %}
+            - {{ dev }}: {{ ansible_devices[dev].size }}
+          {% endfor %}
+
+          You must set target_disk, for example:
+            -e target_disk=/dev/nvme0n1
 
     - name: Interactive user warning and confirmation
       debug:
