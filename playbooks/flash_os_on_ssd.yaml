@@ -67,7 +67,7 @@
 
     - name: Clone rpi-clone repo
       git:
-        repo: "https://github.com/jeffgeerling/rpi-clone.git"
+        repo: "https://github.com/geerlingguy/rpi-clone.git"
         dest: /tmp/rpi-clone
         version: HEAD
       when: not rpi_clone_bin.stat.exists
@@ -79,6 +79,7 @@
         owner: root
         group: root
         mode: "0755"
+        remote_src: yes
       when: not rpi_clone_bin.stat.exists
 
     # Partition target disk
@@ -136,11 +137,20 @@
 
     # Clone from SD to SSD
     - name: Clone boot and root to target disk (overwrite partitions 1 and 2)
-      shell: yes | /usr/local/sbin/rpi-clone -p 1,2 {{ target_disk }}
+      shell: yes | /usr/local/sbin/rpi-clone {{ target_disk }}
       args:
         executable: /bin/bash
       environment:
         LC_ALL: C
+      register: rpi_clone_result
 
     - name: Refresh partition table after cloning
       command: "partprobe {{ target_disk }}"
+
+    - name: Reboot system to use SSD as boot device
+      reboot:
+        msg: "Rebooting to use SSD as boot device"
+        pre_reboot_delay: 5
+        reboot_timeout: 300
+        post_reboot_delay: 10
+      when: rpi_clone_result.rc == 0
