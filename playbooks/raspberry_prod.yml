@@ -25,7 +25,6 @@
     common_admin_authorized_keys:
       - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICHvfORDLKCBFhwwviIAY2RtARl3LclLIEVE1r7JCVMl"
     hostname: "srvprod01"
-    raspberry_disable_pi_user: true
     raspberry_expand_rootfs: false
     hardening_disable_services: ["bluetooth"]
     ssh_allow_groups: ["admin", "sudo"]
@@ -49,6 +48,8 @@
     komodo_periphery_version: "1.19.5"
     komodo_host_url: "komodo.casa"
     backup_smb_share: "192.168.1.100/backup"
+
+    ansible_user: "admin"
   vars_files:
     - ../inventory/group_vars/prod-vault.yaml
 

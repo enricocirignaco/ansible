@@ -35,6 +35,8 @@
     - "{{ KOMODO_SYNCS_PATH }}"
     - "{{ PERIPHERY_PATH }}"
     - "{{ CERTIFICATES_PATH }}"
+    - "{{ POSTGRES_DATA_PATH }}"
+    - "{{ FERRETDB_STATE_PATH }}"
   loop_control:
     label: "{{ item }}"
   when: item is not none and item | length > 0

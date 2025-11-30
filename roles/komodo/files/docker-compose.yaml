@@ -6,7 +6,7 @@ services:
       komodo.skip:
     restart: unless-stopped
     volumes:
-      - "postgres-data:/var/lib/postgresql/data"
+      - "${POSTGRES_DATA_PATH}:/var/lib/postgresql/data"
     environment:
       POSTGRES_USER: "${KOMODO_DATABASE_USERNAME}"
       POSTGRES_PASSWORD: "${KOMODO_DATABASE_PASSWORD}"
@@ -23,7 +23,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - "ferretdb-state:/state"
+      - "${FERRETDB_STATE_PATH}:/state"
     environment:
       FERRETDB_POSTGRESQL_URL: "postgres://${KOMODO_DATABASE_USERNAME}:${KOMODO_DATABASE_PASSWORD}@postgres:5432/postgres"
       TZ: "${TIMEZONE}"

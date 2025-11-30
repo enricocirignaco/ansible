@@ -14,6 +14,8 @@ KOMODO_BACKUPS_PATH: "{{ komodo_deployment_directory }}/backups"
 KOMODO_SYNCS_PATH: "{{ komodo_deployment_directory }}/syncs"
 PERIPHERY_PATH: "{{ komodo_deployment_directory }}/periphery"
 CERTIFICATES_PATH: "{{ komodo_deployment_directory }}/certificates"
+POSTGRES_DATA_PATH: "{{ komodo_deployment_directory }}/postgres"
+FERRETDB_STATE_PATH: "{{ komodo_deployment_directory }}/ferretdb"
 KOMODO_LOCAL_AUTH: "{{ komodo_local_auth }}"
 KOMODO_DISABLE_CONFIRM_DIALOG: "{{ komodo_disable_confirm_dialog }}"
 
@@ -22,3 +24,4 @@ KOMODO_DB_PASSWORD: "{{ komodo_secret_db_password }}"
 KOMODO_PASSKEY: "{{ komodo_secret_passkey }}"
 KOMODO_WEBHOOK_SECRET: "{{ komodo_secret_webhook_secret }}"
 KOMODO_JWT_SECRET: "{{ komodo_secret_jwt_secret }}"
+
