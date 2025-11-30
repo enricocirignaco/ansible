@@ -138,7 +138,7 @@
         dev: "{{ target_disk }}p2"
       when: format_disk | bool
 
-    - name: Create ext4 filesystem on root partition (p2)
+    - name: Create ext4 filesystem on data partition (p3)
       filesystem:
         fstype: ext4
         dev: "{{ target_disk }}p3"
@@ -198,4 +198,6 @@
         pre_reboot_delay: 5
         reboot_timeout: 300
         post_reboot_delay: 10
-      when: rpi_clone_result.rc == 0
+      when:
+        - rpi_clone_result is defined
+        - rpi_clone_result.rc == 0
