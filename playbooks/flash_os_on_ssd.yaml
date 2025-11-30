@@ -8,11 +8,12 @@
   become: true
   vars:
     # Defaults
-    boot_size_mb: 256
+    boot_size_mb: 512
     root_size_gb: 28
     format_disk: false
     ansible_python_interpreter: /usr/bin/python3
-  
+    alignment_mib: 4
+
   pre_tasks:
     - name: Ensure Python 3 exists
       raw: test -e /usr/bin/python3 || (apt-get update -y && apt-get install -y python3)
@@ -50,7 +51,12 @@
             - If format_disk == false: Existing partitions are kept, but partitions 1 and 2 will be overwritten by rpi-clone.
 
     - pause:
-        prompt: "Press Enter to continue, or Ctrl+C then 'A' to abort"
+        prompt: "Type 'yes' to continue, or anything else to abort"
+      register: user_confirm
+    - name: Abort if user did not confirm
+      fail:
+        msg: "User aborted the playbook."
+      when: user_confirm.user_input != 'yes'
 
   tasks:
   # Download and install rpi-clone
@@ -82,44 +88,61 @@
         remote_src: yes
       when: not rpi_clone_bin.stat.exists
 
-    # Partition target disk
-    - name: Create MBR partition table on target disk (will erase all data)
-      parted:
-        device: "{{ target_disk }}"
-        label: msdos
-        state: present
-      when: format_disk is true
+    - name: Create new msdos partition table on target disk (will erase all partitions)
+      command: "parted -s {{ target_disk }} mklabel msdos"
+      when: format_disk | bool
 
     - name: Create boot partition (p1)
       parted:
         device: "{{ target_disk }}"
         number: 1
         state: present
-        part_start: 1MiB
-        part_end: "{{ boot_size_mb }}MiB"
+        part_start: "{{ alignment_mib | int }}MiB"
+        part_end:   "{{ (alignment_mib | int) + (boot_size_mb | int) }}MiB"
         fs_type: fat32
-      when: format_disk is true
+      when: format_disk | bool
 
     - name: Create root partition (p2)
       parted:
         device: "{{ target_disk }}"
         number: 2
         state: present
-        part_start: "{{ boot_size_mb }}MiB"
-        part_end: "{{ (boot_size_mb / 1024.0) + root_size_gb }}GiB"
+        part_start: "{{ (alignment_mib | int) + (boot_size_mb | int) }}MiB"
+        part_end:   "{{ (alignment_mib | int)
+                       + (boot_size_mb | int)
+                       + ((root_size_gb | int) * 1024) }}MiB"
         fs_type: ext4
-      when: format_disk is true
+      when: format_disk | bool
 
-    - name: Create data partition (p3) if specified
+    - name: Create data partition (p3)
       parted:
         device: "{{ target_disk }}"
         number: 3
         state: present
-        part_start: "{{ (boot_size_mb / 1024.0) + root_size_gb }}GiB"
+        part_start: "{{ (alignment_mib | int)
+                       + (boot_size_mb | int)
+                       + ((root_size_gb | int) * 1024) }}MiB"
         part_end: "100%"
         fs_type: ext4
-      when:
-        - format_disk is true
+      when: format_disk | bool
+
+    - name: Create FAT32 filesystem on boot partition (p1)
+      filesystem:
+        fstype: vfat
+        dev: "{{ target_disk }}p1"
+      when: format_disk | bool
+
+    - name: Create ext4 filesystem on root partition (p2)
+      filesystem:
+        fstype: ext4
+        dev: "{{ target_disk }}p2"
+      when: format_disk | bool
+
+    - name: Create ext4 filesystem on root partition (p2)
+      filesystem:
+        fstype: ext4
+        dev: "{{ target_disk }}p3"
+      when: format_disk | bool
 
     - name: Refresh partition table
       command: "partprobe {{ target_disk }}"
@@ -135,17 +158,39 @@
     - name: Set boot order
       command: raspi-config nonint do_boot_order B2
 
-    # Clone from SD to SSD
-    - name: Clone boot and root to target disk (overwrite partitions 1 and 2)
-      shell: yes | /usr/local/sbin/rpi-clone {{ target_disk }}
+    - name: Dry-run rpi-clone (auto-answer "no" to see the summary)
+      shell: |
+        echo no | sudo rpi-clone {{ target_disk }} || true
       args:
         executable: /bin/bash
       environment:
         LC_ALL: C
-      register: rpi_clone_result
+      register: rpi_clone_dry
+      changed_when: false
+      failed_when: false
 
-    - name: Refresh partition table after cloning
-      command: "partprobe {{ target_disk }}"
+    - name: Show rpi-clone dry-run output
+      debug:
+        msg: "rpi-clone dry run: {{ rpi_clone_dry.stdout }}"
+
+    - name: Ask whether to actually run rpi-clone now
+      pause:
+        prompt: |
+          Above is the output of:
+            sudo rpi-clone {{ target_disk }}
+
+          Type 'yes' to actually run the clone now
+      register: clone_confirm
+
+    - name: Run rpi-clone (auto-answer "yes")
+      shell: |
+        yes | sudo rpi-clone {{ target_disk }}
+      args:
+        executable: /bin/bash
+      environment:
+        LC_ALL: C
+      when: clone_confirm.user_input == 'yes'
+      register: rpi_clone_result
 
     - name: Reboot system to use SSD as boot device
       reboot:
