@@ -23,6 +23,21 @@ Role Variables
 - `raspberry_expand_rootfs`  
   Controls whether `raspi-config --expand-rootfs` should run to grow the root filesystem.  
   *Default*: `false`
+- `raspberry_automount_data_partition`  
+  When `true`, ensures the data partition is mounted persistently.  
+  *Default*: `true`
+- `raspberry_data_partition_device`  
+  Block device path for the data partition (created by the SSD flashing playbook).  
+  *Default*: `/dev/nvme0n1p3`
+- `raspberry_data_partition_mountpoint`  
+  Where the data partition should be mounted.  
+  *Default*: `/mnt/data`
+- `raspberry_data_partition_fstype`  
+  Filesystem type for the data partition.  
+  *Default*: `ext4`
+- `raspberry_data_partition_mount_opts`  
+  Mount options applied to the data partition.  
+  *Default*: `defaults,noatime`
 
 What the role does
 ------------------
@@ -30,6 +45,7 @@ What the role does
 - Ensures a boot configuration block that disables Wi-Fi, Bluetooth, HDMI output, onboard audio, and camera auto-detection.
 - Reduces GPU memory allocation to 16 MB to reserve RAM for the CPU.
 - Enables the hardware watchdog through both firmware (`dtparam=watchdog=on`) and the systemd service.
+- Mounts the data partition created by the SSD flashing playbook under `/mnt/data` (configurable).
 - Invokes `raspi-config --expand-rootfs` to grow the root filesystem to the full media size (ignored if the filesystem is already expanded).
 - Reboots the host when the boot configuration or filesystem expansion reports a change.
 

@@ -77,6 +77,12 @@
   when: raspberry_expand_rootfs | bool
   tags: [raspberry]
 
+# automount data partition
+- name: Automount data partition
+  import_tasks: data_partition.yml
+  when: raspberry_automount_data_partition | bool
+  tags: [raspberry, storage]
+
 # Reboot if needed
 - name: Reboot if /boot or hardware settings changed
   ansible.builtin.reboot:

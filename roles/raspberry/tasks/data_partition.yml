@@ -1,0 +1,44 @@
+#SPDX-License-Identifier: MIT-0
+---
+# Automount data partition for Raspberry Pi hosts
+
+- name: Validate data partition variables
+  ansible.builtin.assert:
+    that:
+      - raspberry_data_partition_device | length > 0
+      - raspberry_data_partition_mountpoint | length > 0
+    fail_msg: "Data partition variables are not fully defined."
+    quiet: true
+  tags: [raspberry, storage]
+
+- name: Ensure data partition device exists
+  ansible.builtin.stat:
+    path: "{{ raspberry_data_partition_device }}"
+  register: raspberry_data_device
+  tags: [raspberry, storage]
+
+- name: Fail if data partition device is missing
+  ansible.builtin.fail:
+    msg: "Data partition device {{ raspberry_data_partition_device }} not found. Run the SSD flashing playbook or adjust raspberry_data_partition_device."
+  when: not raspberry_data_device.stat.exists
+  tags: [raspberry, storage]
+
+- name: Ensure data partition mountpoint exists
+  ansible.builtin.file:
+    path: "{{ raspberry_data_partition_mountpoint }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  tags: [raspberry, storage]
+
+- name: Ensure data partition is mounted and persistent
+  ansible.posix.mount:
+    path: "{{ raspberry_data_partition_mountpoint }}"
+    src: "{{ raspberry_data_partition_device }}"
+    fstype: ext4
+    opts: "defaults,noatime"
+    state: mounted
+  become: true
+  tags: [raspberry, storage]
