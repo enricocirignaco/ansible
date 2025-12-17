@@ -26,6 +26,10 @@
       - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICHvfORDLKCBFhwwviIAY2RtARl3LclLIEVE1r7JCVMl"
     hostname: "srvprod01"
     raspberry_expand_rootfs: false
+    raspberry_automount_data_partition: true
+    raspberry_data_partition_device: "/dev/nvme0n1p3"
+    raspberry_data_partition_mountpoint: "/mnt/data"
+    raspberry_data_partition_fstype: "ext4"
     hardening_disable_services: ["bluetooth"]
     ssh_allow_groups: ["admin", "sudo"]
     ssh_permit_root_login: "no"

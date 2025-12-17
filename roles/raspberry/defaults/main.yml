@@ -6,6 +6,6 @@ raspberry_boot_config_path_fallback: "/boot/config.txt"
 raspberry_disable_pi_user: false
 raspberry_expand_rootfs: true
 raspberry_automount_data_partition: true
-raspberry_data_partition_device: "/dev/nvme0n1p3"
-raspberry_data_partition_mountpoint: "/mnt/data"
+raspberry_data_partition_device: ""
+raspberry_data_partition_mountpoint: ""
 raspberry_data_partition_fstype: "ext4"

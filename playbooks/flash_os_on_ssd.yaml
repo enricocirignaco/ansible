@@ -1,7 +1,7 @@
 ---
 
 # Example usage:
-# ansible-playbook flash_os_on_ssd.yaml -i 'admin@bootstrap,' -e target_disk=/dev/nvme0n1 -e format_disk=true
+# ansible-playbook flash_os_on_ssd.yaml -i 'admin@bootstrap,' -e target_disk=/dev/nvme0n1 -e format_disk=true -e disable_power_management=true
 
 - name: Prepare SSD and clone Raspberry Pi OS from SD
   hosts: all
@@ -13,6 +13,7 @@
     format_disk: false
     ansible_python_interpreter: /usr/bin/python3
     alignment_mib: 4
+    disable_power_management: false
 
   pre_tasks:
     - name: Ensure Python 3 exists
@@ -88,6 +89,22 @@
         remote_src: yes
       when: not rpi_clone_bin.stat.exists
 
+    # Optionally disable NVME and PCIe power management to avoid issues with some SSDs
+    - name: Check cmdline.txt location
+      stat:
+        path: /boot/firmware/cmdline.txt
+      register: cmdline_firmware
+      when: disable_power_management | bool
+
+    - name: Disable NVME and PCIe power management
+      ansible.builtin.lineinfile:
+        path: "{{ cmdline_firmware.stat.exists | default(false) | ternary('/boot/firmware/cmdline.txt', '/boot/cmdline.txt') }}"
+        regexp: '^(?!.*pcie_aspm=off)(.*)$'
+        line: '\\1 pcie_aspm=off nvme_core.default_ps_max_latency_us=0'
+        backrefs: true
+      when: disable_power_management | bool
+
+    # Prepare target disk
     - name: Create new msdos partition table on target disk (will erase all partitions)
       command: "parted -s {{ target_disk }} mklabel msdos"
       when: format_disk | bool
@@ -157,7 +174,8 @@
 
     - name: Set boot order
       command: raspi-config nonint do_boot_order B2
-
+      
+    # Dry-run rpi-clone to show what would be done, then ask for confirmation
     - name: Dry-run rpi-clone (auto-answer "no" to see the summary)
       shell: |
         echo no | sudo rpi-clone {{ target_disk }} || true
