@@ -81,8 +81,7 @@
       {
         "log-driver": "json-file",
         "log-opts": { "max-size": "10m", "max-file": "3" },
-        "exec-opts": ["native.cgroupdriver=systemd"],
-        "exec-opts": ["native.cgroupdriver=systemd"],
+        "exec-opts": ["native.cgroupdriver=systemd"]
 
       }
     owner: root
@@ -157,6 +156,7 @@
       # This is a containerd configuration file managed by Ansible.
       # Any manual changes made to this file will be overwritten.
 
+      disabled_plugins = ["cri"]
       root = "{{ docker_containerd_root }}"
       state = "/run/containerd"
   notify: Restart containerd

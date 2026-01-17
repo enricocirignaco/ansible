@@ -14,7 +14,11 @@ Requirements
 Role Variables
 --------------
 
-This role does not expose user-facing variables yet. Override files or extend the role if custom daemon settings are required.
+- `docker_data_mountpoint` (optional): Mountpoint that should be available before starting Docker/containerd when data is on a separate disk (e.g. `/mnt/data`).
+- `docker_data_root` (optional): Docker data-root directory (e.g. `/mnt/data/docker-data`).
+- `docker_containerd_root` (optional): containerd root directory (e.g. `/mnt/data/docker-data/containerd`).
+
+Set these in inventory/group vars when relocating data to a dedicated disk/partition.
 
 What the role does
 ------------------

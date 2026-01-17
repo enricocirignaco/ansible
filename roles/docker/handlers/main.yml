@@ -1,6 +1,7 @@
 #SPDX-License-Identifier: MIT-0
 ---
 - name: Restart docker
+  become: true
   ansible.builtin.systemd:
     name: docker
     state: restarted
