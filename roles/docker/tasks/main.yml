@@ -1,6 +1,8 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/docker
+
+# Install docker
 - name: Install prerequisites
   apt:
     name:
@@ -51,6 +53,7 @@
     update_cache: yes
   become: true
 
+# Configure docker
 - name: Configure Docker daemon
   ansible.builtin.copy:
     dest: /etc/docker/daemon.json
@@ -58,12 +61,91 @@
       {
         "log-driver": "json-file",
         "log-opts": { "max-size": "10m", "max-file": "3" },
-        "exec-opts": ["native.cgroupdriver=systemd"]
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "data-root": "/mnt/data/docker-data"
       }
     owner: root
     group: root
     mode: "0644"
-  notify: Restart docker
+  notify:
+  - Restart docker
+  become: true
+
+- name: Ensure containerd config directory exists
+  ansible.builtin.file:
+    path: /etc/containerd
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Backup existing containerd config (if present)
+  ansible.builtin.command: mv /etc/containerd/config.toml /etc/containerd/config.toml.BAK
+  args:
+    creates: /etc/containerd/config.toml.BAK
+  become: true
+  when: ansible.builtin.stat(path="/etc/containerd/config.toml").stat.exists
+
+- name: Write fresh containerd config with relocated root
+  ansible.builtin.copy:
+    dest: /etc/containerd/config.toml
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      # This is a containerd configuration file managed by Ansible.
+      # Any manual changes made to this file will be overwritten.
+
+      root = "/mnt/data/docker-data/containerd"
+      state = "/run/containerd"
+  notify: Restart containerd
+  become: true
+  
+- name: Ensure docker systemd override directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Ensure docker waits for /mnt/data mount
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/docker.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      RequiresMountsFor=/mnt/data
+  notify:
+    - Systemd daemon-reload
+    - Restart docker
+  become: true
+
+- name: Ensure containerd systemd override directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/containerd.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Ensure containerd waits for /mnt/data mount
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/containerd.service.d/override.conf
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      RequiresMountsFor=/mnt/data
+  notify:
+    - Systemd daemon-reload
+    - Restart containerd
   become: true
 
 - name: Ensure docker service enabled and running
