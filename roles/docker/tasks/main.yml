@@ -65,8 +65,35 @@
   become: true
   when: docker_data_root is defined
 
-# Configure docker
-- name: Configure Docker daemon
+- name: Ensure /etc/docker exists
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+
+- name: Configure Docker daemon (default)
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": { "max-size": "10m", "max-file": "3" },
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "exec-opts": ["native.cgroupdriver=systemd"],
+
+      }
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - Restart docker
+  become: true
+  when: docker_data_root is not defined
+
+- name: Configure Docker daemon (with relocated data-root)
   ansible.builtin.copy:
     dest: /etc/docker/daemon.json
     content: |
@@ -186,6 +213,9 @@
     - Restart containerd
   become: true
   when: docker_data_mountpoint is defined
+
+- name: Apply docker/containerd changes before starting services
+  ansible.builtin.meta: flush_handlers
 
 - name: Ensure docker service enabled and running
   ansible.builtin.systemd:
