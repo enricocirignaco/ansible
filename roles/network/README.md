@@ -1,7 +1,7 @@
 Role Name
 =========
 
-Configure NetworkManager connections (static IPv4, IPv6 policy, discovery).
+Configure NetworkManager connections (IPv4 static or DHCP, IPv6 policy, discovery).
 
 Requirements
 ------------
@@ -18,6 +18,10 @@ Role Variables
 Mandatory variables (must be provided via inventory / host_vars / group_vars):
 
 - network_interface (string) — interface name, e.g., "eth0"
+- network_method_v4 (string, default: "static") — IPv4 method ("static" or "dhcp")
+
+Required when network_method_v4 = "static":
+
 - network_address (CIDR) — IPv4 with prefix, e.g., "192.168.1.157/24"
 - network_gateway (ip) — IPv4 gateway, e.g., "192.168.1.1"
 - network_dns (list of ip) — DNS servers, e.g., ["192.168.1.1", "1.1.1.1"]
@@ -37,7 +41,7 @@ What the role does
 ------------------
 
 - Installs network-manager package on Debian-based systems and ensures the NetworkManager service is enabled and running.
-- Configures a static IPv4 connection using community.general.nmcli with provided address, gateway, DNS, type, and connection name.
+- Configures an IPv4 connection using community.general.nmcli (static or DHCP) with provided address, gateway, DNS, type, and connection name.
 - Optionally sets ipv6_method=ignore on the connection when network_disable_ipv6 is true.
 - Manages discovery services: can enable avahi-daemon and set LLMNR=no in systemd-resolved configuration.
 - Registers task results (nmcli changes, IPv6 change, service changes) so you can decide whether to trigger a reboot (controlled by network_reboot_if_changed).
@@ -52,11 +56,24 @@ Example Playbook
     - role: network
       vars:
         network_interface: eth0
+        network_method_v4: static
         network_address: 192.168.1.157/24
         network_gateway: 192.168.1.1
         network_dns:
           - 192.168.1.1
           - 1.1.1.1
+```
+
+DHCP example:
+
+```yaml
+- hosts: all
+  become: true
+  roles:
+    - role: network
+      vars:
+        network_interface: eth0
+        network_method_v4: dhcp
 ```
 
 License

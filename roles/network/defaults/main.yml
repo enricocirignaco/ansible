@@ -2,5 +2,6 @@
 ---
 # defaults file for roles/network
 network_disable_ipv6: true
+network_method_v4: dhcp
 network_type: ethernet
 network_reboot_if_changed: true

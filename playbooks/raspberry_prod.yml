@@ -42,9 +42,7 @@
     ssh_client_alive_count_max: 2
     debian_hardening_enable_persistent_logs: true
     network_interface: "eth0"
-    network_address: "192.168.1.128/24"
-    network_gateway: "192.168.1.1"
-    network_dns: ["127.0.0.1", "192.168.1.126"]
+    network_method_v4: "dhcp"
     docker_data_mountpoint: /mnt/data
     docker_data_root: /mnt/data/docker-data
     docker_containerd_root: /mnt/data/docker-data/containerd

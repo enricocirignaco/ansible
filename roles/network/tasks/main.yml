@@ -5,6 +5,17 @@
   ansible.builtin.assert:
     that:
       - network_interface is defined and network_interface is string
+      - network_method_v4 is defined
+      - network_method_v4 in ['static', 'dhcp']
+
+    fail_msg: >-
+      Missing required variables. You must define network_interface and
+      network_method_v4 ('static' or 'dhcp').
+  tags: [network]
+
+- name: Preflight | Ensure static IPv4 variables are defined
+  ansible.builtin.assert:
+    that:
       - "'/' in network_address"
       - (network_address | ansible.utils.ipaddr('address')) is ansible.utils.ipv4
       - network_gateway is defined and network_gateway is ansible.utils.ipv4
@@ -12,12 +23,13 @@
       - network_dns | select('ansible.utils.ipv4') | list | length == (network_dns | length)
 
     fail_msg: >-
-      Missing required variables. You must define network_interface, network_address,
-      network_gateway, and network_dns (list). Example:
+      Missing required variables for static IPv4 config. You must define
+      network_address, network_gateway, and network_dns (list). Example:
       network_interface: eth0
       network_address: 192.168.1.157/24
       network_gateway: 192.168.1.1
       network_dns: ["192.168.1.1", "1.1.1.1"]
+  when: network_method_v4 == 'static'
   tags: [network]
 
 - name: Ensure arping tool is installed
@@ -35,6 +47,7 @@
   changed_when: false
   failed_when: false
   become: true
+  when: network_method_v4 == 'static'
   tags: [network]
 
 - name: Abort if desired IP is already in use
@@ -43,7 +56,9 @@
       IP {{ network_address | ansible.utils.ipaddr('address') }} appears to be in use on the local network
       (ARP replies seen). Aborting to prevent an address conflict.
       arping output: {{ _arping.stdout | default('') }} {{ _arping.stderr | default('') }}
-  when: _arping.rc == 1
+  when:
+    - network_method_v4 == 'static'
+    - _arping.rc == 1
   tags: [network]
 
 - name: Ensure NetworkManager is installed
@@ -62,16 +77,16 @@
   become: true
   tags: [network]
 
-- name: Configure static IPv4 connection with NetworkManager
+- name: Configure IPv4 connection with NetworkManager
   community.general.nmcli:
     conn_name: "{{ network_interface }}"
     ifname: "{{ network_interface }}"
     type: "{{ network_type }}"
     autoconnect: yes
-    method4: manual
-    ip4: "{{ network_address }}"
-    gw4: "{{ network_gateway }}"
-    dns4: "{{ network_dns }}"
+    method4: "{{ 'manual' if network_method_v4 == 'static' else 'auto' }}"
+    ip4: "{{ (network_method_v4 == 'static') | ternary(network_address, omit) }}"
+    gw4: "{{ (network_method_v4 == 'static') | ternary(network_gateway, omit) }}"
+    dns4: "{{ (network_method_v4 == 'static') | ternary(network_dns, omit) }}"
     state: present
   become: true
   register: nmcli_result
