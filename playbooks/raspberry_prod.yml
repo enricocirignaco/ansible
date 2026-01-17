@@ -45,6 +45,9 @@
     network_address: "192.168.1.128/24"
     network_gateway: "192.168.1.1"
     network_dns: ["127.0.0.1", "192.168.1.126"]
+    docker_data_mountpoint: /mnt/data
+    docker_data_root: /mnt/data/docker-data
+    docker_containerd_root: /mnt/data/docker-data/containerd
     komodo_deployment_directory: "/srv/komodo"
     komodo_postgres_version: "17-0.106.0-ferretdb-2.5.0"
     komodo_ferretdb_version: "2.5.0"

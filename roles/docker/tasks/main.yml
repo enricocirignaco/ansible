@@ -53,6 +53,18 @@
     update_cache: yes
   become: true
 
+#
+# Ensure Docker data-root directory exists if relocation is enabled
+- name: Ensure Docker data-root directory exists
+  ansible.builtin.file:
+    path: "{{ docker_data_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0711"
+  become: true
+  when: docker_data_root is defined
+
 # Configure docker
 - name: Configure Docker daemon
   ansible.builtin.copy:
@@ -62,14 +74,15 @@
         "log-driver": "json-file",
         "log-opts": { "max-size": "10m", "max-file": "3" },
         "exec-opts": ["native.cgroupdriver=systemd"],
-        "data-root": "/mnt/data/docker-data"
+        "data-root": "{{ docker_data_root }}"
       }
     owner: root
     group: root
     mode: "0644"
   notify:
-  - Restart docker
+    - Restart docker
   become: true
+  when: docker_data_root is defined
 
 - name: Ensure containerd config directory exists
   ansible.builtin.file:
@@ -80,12 +93,32 @@
     mode: "0755"
   become: true
 
+#
+# Check if containerd config exists
+- name: Check if containerd config exists
+  ansible.builtin.stat:
+    path: /etc/containerd/config.toml
+  register: containerd_config_stat
+  become: true
+
 - name: Backup existing containerd config (if present)
   ansible.builtin.command: mv /etc/containerd/config.toml /etc/containerd/config.toml.BAK
   args:
     creates: /etc/containerd/config.toml.BAK
   become: true
-  when: ansible.builtin.stat(path="/etc/containerd/config.toml").stat.exists
+  when: containerd_config_stat.stat.exists and docker_containerd_root is defined
+
+#
+# Ensure containerd root directory exists
+- name: Ensure containerd root directory exists
+  ansible.builtin.file:
+    path: "{{ docker_containerd_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0711"
+  become: true
+  when: docker_containerd_root is defined
 
 - name: Write fresh containerd config with relocated root
   ansible.builtin.copy:
@@ -97,11 +130,13 @@
       # This is a containerd configuration file managed by Ansible.
       # Any manual changes made to this file will be overwritten.
 
-      root = "/mnt/data/docker-data/containerd"
+      root = "{{ docker_containerd_root }}"
       state = "/run/containerd"
   notify: Restart containerd
   become: true
+  when: docker_containerd_root is defined
   
+#
 - name: Ensure docker systemd override directory exists
   ansible.builtin.file:
     path: /etc/systemd/system/docker.service.d
@@ -110,6 +145,7 @@
     group: root
     mode: "0755"
   become: true
+  when: docker_data_mountpoint is defined
 
 - name: Ensure docker waits for /mnt/data mount
   ansible.builtin.copy:
@@ -119,11 +155,12 @@
     mode: "0644"
     content: |
       [Unit]
-      RequiresMountsFor=/mnt/data
+      RequiresMountsFor={{ docker_data_mountpoint }}
   notify:
     - Systemd daemon-reload
     - Restart docker
   become: true
+  when: docker_data_mountpoint is defined
 
 - name: Ensure containerd systemd override directory exists
   ansible.builtin.file:
@@ -133,6 +170,7 @@
     group: root
     mode: "0755"
   become: true
+  when: docker_data_mountpoint is defined
 
 - name: Ensure containerd waits for /mnt/data mount
   ansible.builtin.copy:
@@ -142,11 +180,12 @@
     mode: "0644"
     content: |
       [Unit]
-      RequiresMountsFor=/mnt/data
+      RequiresMountsFor={{ docker_data_mountpoint }}
   notify:
     - Systemd daemon-reload
     - Restart containerd
   become: true
+  when: docker_data_mountpoint is defined
 
 - name: Ensure docker service enabled and running
   ansible.builtin.systemd:

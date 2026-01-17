@@ -1,3 +1,10 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/docker
+
+# Use docker_data_mountpoint only when the docker or containerd data is on a separate disk / partition.
+# It ensures Docker and containerd wait for the mount and never recreate data directories on / during boot.
+
+#docker_data_mountpoint: /mnt/data
+#docker_data_root: /mnt/data/docker-data
+#docker_containerd_root: /mnt/data/docker-data/containerd
