@@ -14,7 +14,7 @@ Requirements
 Role Variables
 --------------
 
-- `system_update_mode`  
+- `debian_update_mode`  
   Controls the upgrade strategy supplied to `apt` (`safe`, `full`, `minimal`).  
   *Default*: `"safe"`
 
@@ -34,9 +34,9 @@ Example Playbook
 - hosts: debian
   become: true
   roles:
-    - role: debian-update
+    - role: debian_update
       vars:
-        system_update_mode: full
+        debian_update_mode: full
 ```
 
 License

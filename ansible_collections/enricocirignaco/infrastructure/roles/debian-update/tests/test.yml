@@ -3,4 +3,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - roles/debian-update
+    - roles/debian_update

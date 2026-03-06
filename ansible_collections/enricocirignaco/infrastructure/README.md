@@ -7,7 +7,7 @@ Infrastructure automation collection for Debian and Raspberry Pi hosts.
 - `debian_bootstrap`: one-time bootstrap of admin access and base SSH configuration.
 - `common`: baseline host configuration (packages, locale, timezone, users).
 - `debian_hardening`: practical hardening defaults for SSH, updates, and sysctl.
-- `debian-update`: host patching and controlled reboot flow.
+- `debian_update`: host patching and controlled reboot flow.
 - `network`: NetworkManager-based interface configuration and discovery behavior.
 - `raspberry`: Raspberry Pi hardware and boot-level baseline.
 - `docker`: Docker Engine installation and daemon tuning.

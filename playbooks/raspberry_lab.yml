@@ -4,14 +4,14 @@
   become: true
   gather_facts: true
   roles:
-    - debian-update
+    - debian_update
     - common
     - raspberry
     - debian_hardening
     - network
     - docker
   vars:
-    system_update_mode: "full"
+    debian_update_mode: "full"
     common_admin_groups:
       - adm
       - dialout
