@@ -1,38 +1,79 @@
-Role Name
-=========
+Debian Bootstrap Role
+=====================
 
-A brief description of the role goes here.
+Version
+-------
+
+Current role version: `1.0.0`  
+Canonical source: `roles/debian_bootstrap/VERSION`
+
+Description
+-----------
+
+Bootstraps Debian-based hosts for ongoing Ansible management by:
+
+- ensuring Python 3 is present
+- creating a dedicated admin account
+- installing one or more SSH public keys
+- optionally enabling passwordless sudo via `/etc/sudoers.d`
+- verifying SSH access as the new admin user
+
+Operational Guidance
+--------------------
+
+This role is written to be idempotent, but it is intended to be run **once** during host bootstrap, in a **standalone playbook**.
+
+Reason: the role resets the SSH connection and validates login as the new admin user, which is appropriate for first-time provisioning but can introduce side effects in larger multi-role plays.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Debian-based target host
+- privilege escalation (`become: true`)
+- initial SSH user with rights to create users and manage sudoers
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Defaults are defined in `defaults/main.yml`:
 
-Dependencies
-------------
+- `debian_bootstrap_ansible_user`  
+  Admin account to create and validate.  
+  Default: `ansible`
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- `debian_bootstrap_ansible_groups`  
+  Groups assigned to the admin account.  
+  Default: `["sudo"]`
 
-Example Playbook
-----------------
+- `debian_bootstrap_enable_nopasswd_sudo`  
+  Whether to create passwordless sudo drop-in for the admin account.  
+  Default: `true`  
+  Behavior: when `false`, the drop-in file is removed.
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+- `debian_bootstrap_admin_pubkeys`  
+  List of SSH public keys to install for the admin account.  
+  Default: empty list (must be overridden).
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+Example Standalone Playbook
+---------------------------
+
+```yaml
+---
+- name: Bootstrap Debian hosts
+  hosts: bootstrap
+  become: true
+  gather_facts: false
+  roles:
+    - role: debian_bootstrap
+      vars:
+        debian_bootstrap_ansible_user: ansible
+        debian_bootstrap_ansible_groups: ["sudo"]
+        debian_bootstrap_enable_nopasswd_sudo: true
+        debian_bootstrap_admin_pubkeys:
+          - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... your-key-comment"
+```
 
 License
 -------
 
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+MIT-0
