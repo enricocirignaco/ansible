@@ -7,16 +7,16 @@
 
 - name: Create dedicated admin user
   user:
-    name: "{{ ansible_user }}"
+    name: "{{ debian_bootstrap_ansible_user }}"
     shell: /bin/bash
-    groups: "{{ ansible_groups | join(',') }}"
+    groups: "{{ debian_bootstrap_ansible_groups | join(',') }}"
     append: true   # Append user to groups without removing from others
     create_home: true
     state: present
 
 - name: Install authorized_keys
   authorized_key:
-    user: "{{ ansible_user }}"
+    user: "{{ debian_bootstrap_ansible_user }}"
     key: "{{ item }}"
     state: present
     manage_dir: true # Ensure .ssh directory is present
@@ -24,31 +24,37 @@
 
 - name: Enforce authorized_keys permissions
   file:
-    path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    path: "/home/{{ debian_bootstrap_ansible_user }}/.ssh/authorized_keys"
+    owner: "{{ debian_bootstrap_ansible_user }}"
+    group: "{{ debian_bootstrap_ansible_user }}"
     mode: "0600"
     state: file
 
 - name: Optionally grant passwordless sudo (drop-in)
   copy:
-    dest: "/etc/sudoers.d/010-{{ ansible_user }}-nopasswd"
-    content: "{{ ansible_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    dest: "/etc/sudoers.d/010-{{ debian_bootstrap_ansible_user }}-nopasswd"
+    content: "{{ debian_bootstrap_ansible_user }} ALL=(ALL) NOPASSWD:ALL\n"
     owner: root
     group: root
     mode: "0440"  # Read-only for owner and group; required for sudoers files
-  when: enable_nopasswd_sudo
+  when: debian_bootstrap_enable_nopasswd_sudo | bool
+
+- name: Remove passwordless sudo drop-in when disabled
+  file:
+    path: "/etc/sudoers.d/010-{{ debian_bootstrap_ansible_user }}-nopasswd"
+    state: absent
+  when: not (debian_bootstrap_enable_nopasswd_sudo | bool)
 
 - name: Verify SSH login as admin user
   vars:
     # Override connection user for this block to test the new account directly
-    ansible_user: "{{ ansible_user }}"
+    debian_bootstrap_ansible_user: "{{ debian_bootstrap_ansible_user }}"
   become: false
   block:
     - name: Reset SSH connection to pick up new user
       meta: reset_connection
 
-    - name: Wait for connection as {{ ansible_user }}
+    - name: Wait for connection as {{ debian_bootstrap_ansible_user }}
       wait_for_connection:
         timeout: 30
 
@@ -60,11 +66,11 @@
     - name: Assert we are logged in as the admin user
       assert:
         that:
-          - whoami_out.stdout == ansible_user
-        fail_msg: "Re-login as {{ ansible_user }} failed — not creating completion marker."
+          - whoami_out.stdout == debian_bootstrap_ansible_user
+        fail_msg: "Re-login as {{ debian_bootstrap_ansible_user }} failed — not creating completion marker."
 
 - name: Display success message
   debug:
     msg: |
-      Bootstrap successful. You can now login as '{{ ansible_user }}' on {{ inventory_hostname }}.
-      Example: ssh -i <your-private-key> {{ ansible_user }}@{{ ansible_host }}
+      Bootstrap successful. You can now login as '{{ debian_bootstrap_ansible_user }}' on {{ inventory_hostname }}.
+      Example: ssh -i <your-private-key> {{ debian_bootstrap_ansible_user }}@{{ ansible_host }}
