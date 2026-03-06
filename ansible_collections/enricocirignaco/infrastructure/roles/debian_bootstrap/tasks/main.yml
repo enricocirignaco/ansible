@@ -17,6 +17,7 @@
 - name: Install authorized_keys
   authorized_key:
     user: "{{ debian_bootstrap_ansible_user }}"
+    path: "/home/{{ debian_bootstrap_ansible_user }}/.ssh/authorized_keys"
     key: "{{ item }}"
     state: present
     manage_dir: true # Ensure .ssh directory is present
