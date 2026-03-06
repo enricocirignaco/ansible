@@ -49,7 +49,7 @@
 - name: Verify SSH login as admin user
   vars:
     # Override connection user for this block to test the new account directly
-    debian_bootstrap_ansible_user: "{{ debian_bootstrap_ansible_user }}"
+    ansible_user: "{{ debian_bootstrap_ansible_user }}"
   become: false
   block:
     - name: Reset SSH connection to pick up new user
