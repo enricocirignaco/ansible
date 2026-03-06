@@ -35,10 +35,19 @@
   register: reboot_required
   tags: [update, reboot]
 
+- name: Log reboot requirement status
+  ansible.builtin.debug:
+    msg: >-
+      Reboot required: {{ reboot_required.stat.exists | bool }}.
+      Auto reboot enabled: {{ debian_update_auto_reboot | bool }}.
+  tags: [update, reboot]
+
 - name: Reboot if required
   ansible.builtin.reboot:
     msg: "Rebooting after kernel/libc update."
     reboot_timeout: 600
-  when: reboot_required.stat.exists
+  when:
+    - reboot_required.stat.exists
+    - debian_update_auto_reboot | bool
   become: true
   tags: [update, reboot]

@@ -7,3 +7,7 @@
 # 'full'   → performs a full distribution upgrade, allowing installation or removal of packages
 # 'minimal' → upgrades only essential or critical packages as configured in APT
 debian_update_mode: "safe"
+
+# Whether the role is allowed to reboot automatically when
+# /var/run/reboot-required exists.
+debian_update_auto_reboot: false

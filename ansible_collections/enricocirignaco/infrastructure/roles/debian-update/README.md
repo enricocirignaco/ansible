@@ -18,6 +18,10 @@ Role Variables
   Controls the upgrade strategy supplied to `apt` (`safe`, `full`, `minimal`).  
   *Default*: `"safe"`
 
+- `debian_update_auto_reboot`  
+  Allows the role to reboot automatically when `/var/run/reboot-required` exists.  
+  *Default*: `false`
+
 What the role does
 ------------------
 
@@ -25,7 +29,8 @@ What the role does
 - Runs `apt upgrade` with the requested mode (`safe` by default) to install updates.
 - Removes unused packages via `apt autoremove`.
 - Purges cached package files with `apt autoclean`.
-- Checks for `/var/run/reboot-required` and triggers a reboot if the system needs it.
+- Checks for `/var/run/reboot-required` and logs whether a reboot is required.
+- Reboots only if a reboot is required and `debian_update_auto_reboot` is `true`.
 
 Example Playbook
 ----------------
@@ -37,6 +42,7 @@ Example Playbook
     - role: debian_update
       vars:
         debian_update_mode: full
+        debian_update_auto_reboot: true
 ```
 
 License
