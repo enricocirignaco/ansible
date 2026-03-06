@@ -1,5 +1,5 @@
-Role Name
-=========
+Network Role
+============
 
 Configure NetworkManager connections (IPv4 static or DHCP, IPv6 policy, discovery).
 

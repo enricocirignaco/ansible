@@ -7,3 +7,6 @@ id_*
 
 # MacOS
 .DS_Store
+
+# Archives
+*.tar.gz

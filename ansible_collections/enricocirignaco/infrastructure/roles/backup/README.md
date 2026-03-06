@@ -1,38 +1,55 @@
-Role Name
-=========
+Backup Role
+===========
 
-A brief description of the role goes here.
+Mounts an SMB/CIFS backup share on managed hosts and prepares credentials with restrictive permissions.
+The role also contains optional snapshot automation variables for future extension.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Debian-based host with `apt`.
+- Network access to the SMB server.
+- Valid SMB credentials.
+- Collection dependency: `ansible.posix`.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- `backup_smb_share` (required): SMB share in `host/share` format.
+- `backup_smb_username` (required): Username used to authenticate to SMB.
+- `backup_smb_password` (required): Password used to authenticate to SMB.
+- `backup_smb_mountpoint` (default: `/mnt/backup`): local mount path.
+- `backup_smb_creds_file` (default: `/root/.smb/credentials`): credentials file path.
+- `backup_smb_mount_opts`: mount options passed to `ansible.posix.mount`.
+- Snapshot-related variables exist in `defaults/main.yml` for optional script-based backup automation.
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- None (role-level).
+- Uses `ansible.posix.mount`.
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```yaml
+- hosts: backups
+  become: true
+  roles:
+    - role: backup
+      vars:
+        backup_smb_share: "nas.local/backups"
+        backup_smb_username: "backupuser"
+        backup_smb_password: "{{ vault_backup_smb_password }}"
+        backup_smb_mount_opts: "credentials=/root/.smb/credentials,uid=1000,gid=1000,file_mode=0600,dir_mode=0700,vers=3.0,_netdev"
+```
 
 License
 -------
 
-BSD
+MIT-0
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+Enrico Cirignaco
