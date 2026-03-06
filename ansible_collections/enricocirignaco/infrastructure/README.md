@@ -28,5 +28,5 @@ ansible-galaxy collection build ansible_collections/enricocirignaco/infrastructu
 ## Install locally
 
 ```bash
-ansible-galaxy collection install ./enricocirignaco-infrastructure-1.0.0.tar.gz
+ansible-galaxy collection install ./enricocirignaco-infrastructure-1.0.1.tar.gz
 ```

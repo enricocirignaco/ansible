@@ -69,6 +69,14 @@
         that:
           - whoami_out.stdout == debian_bootstrap_ansible_user
         fail_msg: "Re-login as {{ debian_bootstrap_ansible_user }} failed — not creating completion marker."
+  rescue:
+    - name: Fail with actionable SSH authentication hint
+      fail:
+        msg: >-
+          Unable to re-login as '{{ debian_bootstrap_ansible_user }}' on {{ inventory_hostname }}.
+          This is often caused by missing SSH keys in your local agent.
+          Hint: run `ssh-add -l` to verify and `ssh-add <private-key>` to load your key.
+          Original error: {{ ansible_failed_result.msg | default('unknown error') }}
 
 - name: Display success message
   debug:

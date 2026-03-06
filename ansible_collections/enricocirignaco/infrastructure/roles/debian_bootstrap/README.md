@@ -4,7 +4,7 @@ Debian Bootstrap Role
 Version
 -------
 
-Current role version: `1.0.0`  
+Current role version: `1.0.1`  
 Canonical source: `roles/debian_bootstrap/VERSION`
 
 Description
