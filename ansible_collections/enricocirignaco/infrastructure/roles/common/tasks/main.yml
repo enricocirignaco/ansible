@@ -9,8 +9,8 @@
 
 - name: Optionally set hostname
   ansible.builtin.hostname:
-    name: "{{ hostname }}"
-  when: hostname is defined and hostname != ""
+    name: "{{ common_hostname }}"
+  when: common_hostname is defined and common_hostname != ""
   tags: [hostname, common]
 
 - name: Ensure 127.0.1.1 maps to hostname
@@ -18,10 +18,10 @@
     path: /etc/hosts
     block: |
       127.0.0.1   localhost
-      127.0.1.1   {{ hostname }}
+      127.0.1.1   {{ common_hostname }}
     insertafter: BOF
     create: true
-  when: hostname is defined and hostname != ""
+  when: common_hostname is defined and common_hostname != ""
   tags: [hostname, common]
 
 - name: Ensure system time sync service is enabled and running (systemd-timesyncd)

@@ -22,7 +22,7 @@ Variables can be set in `defaults/main.yml`, overridden in `group_vars/` or `hos
 - `timezone`: Timezone string to apply.  
   *Default*: `Europe/Zurich`
 
-- `hostname`: Hostname to set 
+- `common_hostname`: Hostname to set
   *Default*: `{{ inventory_hostname }}`
 
 - `common_admin_user`: Name of the privileged service account the role manages.
@@ -47,7 +47,7 @@ Example Playbook
   roles:
     - role: common
       vars:
-        hostname: srvprod01
+        common_hostname: srvprod01
 ```
 
 License

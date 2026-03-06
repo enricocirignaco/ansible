@@ -2,6 +2,7 @@
 ---
 # defaults file for roles/common
 timezone: Europe/Zurich
+common_hostname: "{{ hostname | default(inventory_hostname) }}"
 common_base_packages:
   - nano
   - curl
