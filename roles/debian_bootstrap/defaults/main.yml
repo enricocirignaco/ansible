@@ -1,0 +1,11 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for roles/debian_bootstrap
+
+ansible_user: ansible
+ansible_groups: ["sudo"]
+enable_nopasswd_sudo: true
+debian_bootstrap_admin_pubkeys:
+  [
+  # Example: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC..."
+  ]

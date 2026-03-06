@@ -1,0 +1,70 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/debian_bootstrap
+
+- name: Pre tasks for Debian bootstrap
+  import_tasks: pre_tasks.yml
+
+- name: Create dedicated admin user
+  user:
+    name: "{{ ansible_user }}"
+    shell: /bin/bash
+    groups: "{{ ansible_groups | join(',') }}"
+    append: true   # Append user to groups without removing from others
+    create_home: true
+    state: present
+
+- name: Install authorized_keys
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ item }}"
+    state: present
+    manage_dir: true # Ensure .ssh directory is present
+  loop: "{{ debian_bootstrap_admin_pubkeys }}"
+
+- name: Enforce authorized_keys permissions
+  file:
+    path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+    state: file
+
+- name: Optionally grant passwordless sudo (drop-in)
+  copy:
+    dest: "/etc/sudoers.d/010-{{ ansible_user }}-nopasswd"
+    content: "{{ ansible_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"  # Read-only for owner and group; required for sudoers files
+  when: enable_nopasswd_sudo
+
+- name: Verify SSH login as admin user
+  vars:
+    # Override connection user for this block to test the new account directly
+    ansible_user: "{{ ansible_user }}"
+  become: false
+  block:
+    - name: Reset SSH connection to pick up new user
+      meta: reset_connection
+
+    - name: Wait for connection as {{ ansible_user }}
+      wait_for_connection:
+        timeout: 30
+
+    - name: Verify the effective remote user is the admin user
+      command: whoami
+      register: whoami_out
+      changed_when: false
+
+    - name: Assert we are logged in as the admin user
+      assert:
+        that:
+          - whoami_out.stdout == ansible_user
+        fail_msg: "Re-login as {{ ansible_user }} failed — not creating completion marker."
+
+- name: Display success message
+  debug:
+    msg: |
+      Bootstrap successful. You can now login as '{{ ansible_user }}' on {{ inventory_hostname }}.
+      Example: ssh -i <your-private-key> {{ ansible_user }}@{{ ansible_host }}

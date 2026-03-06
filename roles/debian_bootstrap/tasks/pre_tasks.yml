@@ -1,0 +1,21 @@
+#SPDX-License-Identifier: MIT-0
+---
+# pre tasks file for roles/debian_bootstrap
+
+- name: Ensure Python 3 exists
+  raw: test -e /usr/bin/python3 || (apt update -y && apt install -y python3)
+  changed_when: false
+
+- name: Gather facts now that Python is present
+  setup:
+
+- name: Assert admin public keys are provided
+  assert:
+    that:
+      - debian_bootstrap_admin_pubkeys is defined
+      - debian_bootstrap_admin_pubkeys | length > 0
+    fail_msg: >-
+      No admin SSH public keys configured. Set debian_bootstrap_admin_pubkeys in role vars,
+      inventory vars, or extra vars.
+
+# - name: Assert bootstrap was not already run
