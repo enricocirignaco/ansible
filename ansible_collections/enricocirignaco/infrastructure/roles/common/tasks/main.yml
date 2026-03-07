@@ -2,15 +2,14 @@
 ---
 # tasks file for roles/common
 
-- name: Ensure timezone is set
+- name: Set timezone
   ansible.builtin.timezone:
-    name: "{{ timezone }}"
+    name: "{{ common_timezone }}"
   tags: [timezone, common]
 
-- name: Optionally set hostname
+- name: Set hostname
   ansible.builtin.hostname:
     name: "{{ common_hostname }}"
-  when: common_hostname is defined and common_hostname != ""
   tags: [hostname, common]
 
 - name: Ensure 127.0.1.1 maps to hostname
@@ -21,7 +20,6 @@
       127.0.1.1   {{ common_hostname }}
     insertafter: BOF
     create: true
-  when: common_hostname is defined and common_hostname != ""
   tags: [hostname, common]
 
 - name: Ensure system time sync service is enabled and running (systemd-timesyncd)
@@ -92,29 +90,38 @@
     state: started
   tags: [cron, common]
 
-- name: Perform packages upgrade
-  ansible.builtin.apt:
-    upgrade: yes
-  tags: [upgrade, common]
 - name: Ensure base packages are installed
   ansible.builtin.apt:
     name: "{{ common_base_packages }}"
     state: present
     update_cache: true
   tags: [packages, common]
-- name: Autoremove unused packages
-  ansible.builtin.apt:
-    autoremove: true
-  tags: [upgrade, common, clean]
-- name: Autoclean apt cache
-  ansible.builtin.apt:
-    autoclean: true
-  tags: [upgrade, common, clean]
 
-- name: Install Tailscale when requested
-  ansible.builtin.shell: curl -fsSL https://tailscale.com/install.sh | sh
-  args:
-    creates: /usr/sbin/tailscaled
+- name: Ensure Tailscale apt keyring is installed
+  ansible.builtin.get_url:
+    url: "https://pkgs.tailscale.com/stable/debian/{{ ansible_distribution_release }}.noarmor.gpg"
+    dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+    mode: "0644"
+    owner: root
+    group: root
+  when: common_install_tailscale | bool
+  tags: [tailscale, common]
+
+- name: Ensure Tailscale apt repository is configured
+  ansible.builtin.get_url:
+    url: "https://pkgs.tailscale.com/stable/debian/{{ ansible_distribution_release }}.tailscale-keyring.list"
+    dest: /etc/apt/sources.list.d/tailscale.list
+    mode: "0644"
+    owner: root
+    group: root
+  when: common_install_tailscale | bool
+  tags: [tailscale, common]
+
+- name: Install Tailscale package when requested
+  ansible.builtin.apt:
+    name: tailscale
+    state: present
+    update_cache: true
   when: common_install_tailscale | bool
   tags: [tailscale, common]
 
@@ -136,10 +143,22 @@
     label: "{{ locale }}"
   tags: [locale, common]
 
+- name: Read current default locale config
+  ansible.builtin.slurp:
+    path: /etc/default/locale
+  register: common_default_locale_file
+  failed_when: false
+  changed_when: false
+  tags: [locale, common]
+
 - name: Set default system locale
   ansible.builtin.command: >
     update-locale LANG={{ common_system_language }} LC_CTYPE={{ common_system_locale }}
-  changed_when: true
+  when: >
+    common_default_locale_file.content is not defined or
+    ('LANG=' ~ common_system_language) not in (common_default_locale_file.content | b64decode) or
+    ('LC_CTYPE=' ~ common_system_locale) not in (common_default_locale_file.content | b64decode)
+  tags: [locale, common]
 
 - name: Enable weekly Disk TRIM
   ansible.builtin.systemd:
@@ -155,6 +174,7 @@
     owner: root
     group: root
     mode: "0755"
+  when: common_install_homelab_certs | bool
   tags: [certificates, common]
 
 - name: Install trusted certificates
@@ -165,10 +185,13 @@
     group: root
     mode: "0644"
   register: custom_ca_cert
+  when: common_install_homelab_certs | bool
   tags: [certificates, common]
 
 - name: Update CA certificates
   ansible.builtin.command: update-ca-certificates
-  when: custom_ca_cert is changed
+  when:
+    - common_install_homelab_certs | bool
+    - custom_ca_cert is changed
   changed_when: true
   tags: [certificates, common]

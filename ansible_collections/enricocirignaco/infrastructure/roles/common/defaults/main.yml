@@ -1,7 +1,7 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for roles/common
-timezone: Europe/Zurich
+common_timezone: Europe/Zurich
 common_hostname: "{{ hostname | default(inventory_hostname) }}"
 common_base_packages:
   - nano
@@ -19,5 +19,6 @@ common_admin_groups:
   - sudo
 common_admin_authorized_keys: []
 common_install_tailscale: false
+common_install_homelab_certs: false
 common_system_locale: de_CH.UTF-8
 common_system_language: en_US.UTF-8
