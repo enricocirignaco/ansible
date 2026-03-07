@@ -57,6 +57,16 @@
     create_home: true
   tags: [users, common]
 
+- name: Ensure admin has passwordless sudo
+  ansible.builtin.copy:
+    dest: "/etc/sudoers.d/{{ common_admin_user }}"
+    content: "{{ common_admin_user }} ALL=(ALL) NOPASSWD:ALL\n"
+    owner: root
+    group: root
+    mode: "0440"
+    validate: "visudo -cf %s"
+  tags: [users, common]
+
 - name: Ensure admin .ssh directory exists
   ansible.builtin.file:
     path: "{{ common_admin_home }}/.ssh"
