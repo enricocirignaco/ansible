@@ -16,11 +16,16 @@
 - name: Preflight | Ensure static IPv4 variables are defined
   ansible.builtin.assert:
     that:
-      - "'/' in debian_network_address"
-      - (debian_network_address | ansible.utils.ipaddr('address')) is ansible.utils.ipv4
-      - debian_network_gateway is defined and debian_network_gateway is ansible.utils.ipv4
-      - debian_network_dns is defined and debian_network_dns is iterable
-      - debian_network_dns | select('ansible.utils.ipv4') | list | length == (debian_network_dns | length)
+      - >
+        debian_network_address is defined and
+        debian_network_address is string and
+        '/' in debian_network_address and
+        ((debian_network_address | ansible.utils.ipaddr('address')) is ansible.utils.ipv4)
+      - debian_network_gateway is defined and (debian_network_gateway is ansible.utils.ipv4)
+      - >
+        debian_network_dns is defined and
+        debian_network_dns is iterable and
+        (debian_network_dns | select('ansible.utils.ipv4') | list | length == (debian_network_dns | length))
 
     fail_msg: >-
       Missing required variables for static IPv4 config. You must define
@@ -102,7 +107,7 @@
   tags: [network]
   when: debian_network_disable_ipv6
 
-- name: Activate Avahi (mDNS)
+- name: Ensure Avahi (mDNS) is enabled and running
   ansible.builtin.systemd:
     name: avahi-daemon
     enabled: true
@@ -111,13 +116,24 @@
   become: true
   register: avahi_result
   tags: [network, dns]
+  when: debian_network_enable_avahi | bool
+
+- name: Ensure Avahi (mDNS) is disabled and stopped
+  ansible.builtin.systemd:
+    name: avahi-daemon
+    enabled: false
+    state: stopped
+    masked: false
+  become: true
+  register: avahi_result
+  tags: [network, dns]
+  when: not (debian_network_enable_avahi | bool)
 
 - name: Reboot system if needed
-  ansible.builtin.shell: "nohup bash -c 'sleep 2 && /sbin/reboot' >/dev/null 2>&1 &"
+  ansible.builtin.reboot:
+    msg: "Reboot requested by debian_network role after network changes"
+    reboot_timeout: 600
   become: true
-  async: 1
-  poll: 0
-  ignore_errors: true
   when:
     - debian_network_reboot_if_changed
     - >
