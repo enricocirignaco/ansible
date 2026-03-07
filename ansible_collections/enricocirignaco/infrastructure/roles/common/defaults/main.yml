@@ -18,6 +18,7 @@ common_admin_home: "/home/{{ common_admin_user }}"
 common_admin_groups:
   - sudo
 common_admin_authorized_keys: []
+common_enable_cron: true
 common_install_tailscale: false
 common_install_homelab_certs: false
 common_system_locale: de_CH.UTF-8

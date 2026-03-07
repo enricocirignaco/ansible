@@ -48,13 +48,13 @@ Variables can be set in `defaults/main.yml`, overridden in `group_vars/` or `hos
   SSH public keys installed for `common_admin_user`. Must contain at least one key (the role asserts this).  
   *Default*: `[]` (must be overridden)
 
+- `common_enable_cron`  
+  When `true`, ensures the `cron` package is installed and the service is enabled/running.  
+  *Default*: `true`
+
 - `common_install_tailscale`  
   When `true`, configures the official Tailscale apt repository, installs `tailscale`, and enables `tailscaled`.  
   *Default*: `false`
-
-- `common_tailscale_channel`  
-  Tailscale package channel used in repository URLs (`stable` or `unstable`).  
-  *Default*: `stable`
 
 - `common_install_homelab_certs`  
   When `true`, installs `files/root.crt` into the local trust store and runs `update-ca-certificates` on change.  

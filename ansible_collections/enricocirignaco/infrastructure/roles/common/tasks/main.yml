@@ -82,12 +82,21 @@
       '{{ common_admin_user }}' account is provisioned with SSH key access only.
       After first login run: sudo passwd {{ common_admin_user }}
   tags: [users, common]
-  
+
+- name: Ensure cron package is installed
+  ansible.builtin.apt:
+    name: cron
+    state: present
+    update_cache: true
+  when: common_enable_cron | bool
+  tags: [cron, common]
+
 - name: Ensure cron is enabled and running
   ansible.builtin.systemd:
     name: cron
     enabled: true
     state: started
+  when: common_enable_cron | bool
   tags: [cron, common]
 
 - name: Ensure base packages are installed
