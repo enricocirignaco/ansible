@@ -32,6 +32,8 @@ Optional variables:
 - debian_network_disable_ipv6 (bool, default: true) — disable IPv6 on the connection via nmcli
 - debian_network_enable_avahi (bool, default: true) — enable/disable avahi-daemon (mDNS)
 - debian_network_reboot_if_changed (bool, default: true) — reboot after network changes are applied
+- debian_network_wifi_ssid (string, default: "") — required when debian_network_type is "wifi"
+- debian_network_wifi_psk (string, default: "") — required when debian_network_type is "wifi" (store in Ansible Vault)
 
 Files
 -----
@@ -76,6 +78,21 @@ DHCP example:
       vars:
         debian_network_interface: eth0
         debian_network_method_v4: dhcp
+```
+
+Wi-Fi example:
+
+```yaml
+- hosts: all
+  become: true
+  roles:
+    - role: debian_network
+      vars:
+        debian_network_interface: wlan0
+        debian_network_type: wifi
+        debian_network_method_v4: dhcp
+        debian_network_wifi_ssid: "MySSID"
+        debian_network_wifi_psk: "{{ vault_wifi_psk }}"
 ```
 
 License

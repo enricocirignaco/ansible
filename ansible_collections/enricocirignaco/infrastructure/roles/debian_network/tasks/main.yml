@@ -7,10 +7,12 @@
       - debian_network_interface is defined and debian_network_interface is string
       - debian_network_method_v4 is defined
       - debian_network_method_v4 in ['static', 'dhcp']
+      - debian_network_type in ['ethernet', 'wifi']
 
     fail_msg: >-
       Missing required variables. You must define debian_network_interface and
-      debian_network_method_v4 ('static' or 'dhcp').
+      debian_network_method_v4 ('static' or 'dhcp'). debian_network_type must be
+      'ethernet' or 'wifi'.
   tags: [network]
 
 - name: Preflight | Ensure static IPv4 variables are defined
@@ -35,6 +37,21 @@
       debian_network_gateway: 192.168.1.1
       debian_network_dns: ["192.168.1.1", "1.1.1.1"]
   when: debian_network_method_v4 == 'static'
+  tags: [network]
+
+- name: Preflight | Ensure Wi-Fi credentials are defined
+  ansible.builtin.assert:
+    that:
+      - debian_network_wifi_ssid is defined
+      - debian_network_wifi_ssid is string
+      - debian_network_wifi_ssid | length > 0
+      - debian_network_wifi_psk is defined
+      - debian_network_wifi_psk is string
+      - debian_network_wifi_psk | length > 0
+    fail_msg: >-
+      Missing required Wi-Fi variables. You must define debian_network_wifi_ssid
+      and debian_network_wifi_psk when debian_network_type is 'wifi'.
+  when: debian_network_type == 'wifi'
   tags: [network]
 
 - name: Ensure arping tool is installed
@@ -82,11 +99,11 @@
   become: true
   tags: [network]
 
-- name: Configure IPv4 connection with NetworkManager
+- name: Configure ethernet IPv4 connection with NetworkManager
   community.general.nmcli:
     conn_name: "{{ debian_network_interface }}"
     ifname: "{{ debian_network_interface }}"
-    type: "{{ debian_network_type }}"
+    type: ethernet
     autoconnect: yes
     method4: "{{ 'manual' if debian_network_method_v4 == 'static' else 'auto' }}"
     ip4: "{{ (debian_network_method_v4 == 'static') | ternary(debian_network_address, omit) }}"
@@ -96,6 +113,28 @@
   become: true
   register: nmcli_result
   tags: [network]
+  when: debian_network_type == 'ethernet'
+
+- name: Configure wifi IPv4 connection with NetworkManager
+  community.general.nmcli:
+    conn_name: "{{ debian_network_interface }}"
+    ifname: "{{ debian_network_interface }}"
+    type: wifi
+    ssid: "{{ debian_network_wifi_ssid }}"
+    wifi_sec:
+      key-mgmt: wpa-psk
+      psk: "{{ debian_network_wifi_psk }}"
+    autoconnect: yes
+    method4: "{{ 'manual' if debian_network_method_v4 == 'static' else 'auto' }}"
+    ip4: "{{ (debian_network_method_v4 == 'static') | ternary(debian_network_address, omit) }}"
+    gw4: "{{ (debian_network_method_v4 == 'static') | ternary(debian_network_gateway, omit) }}"
+    dns4: "{{ (debian_network_method_v4 == 'static') | ternary(debian_network_dns, omit) }}"
+    state: present
+  become: true
+  register: nmcli_result
+  no_log: true
+  tags: [network]
+  when: debian_network_type == 'wifi'
 
 - name: Disable IPv6 on this connection
   community.general.nmcli:
