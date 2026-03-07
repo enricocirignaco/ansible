@@ -13,9 +13,8 @@ Role Variables
 --------------
 
 - SSH hardening
-  - `debian_hardening_ssh_password_auth` (bool, default: false)
-  - `debian_hardening_ssh_kbdinteractive_auth` (bool, default: false)
-  - `debian_hardening_ssh_pubkey_auth` (bool, default: true)
+  - `debian_hardening_ssh_auth_mode` (string, default: `"keys_only"`)
+    - allowed values: `keys_only`, `password_only`, `keys_and_password`
   - `debian_hardening_ssh_permit_root_login` (string, default: "no")
   - `debian_hardening_ssh_max_auth_tries` (int, default: 3)
   - `debian_hardening_ssh_login_grace_time` (string, default: "30s")
@@ -66,6 +65,7 @@ Example Playbook
       vars:
         # SSH policy
         debian_hardening_ssh_allow_groups: ["sudo", "ansible"]
+        debian_hardening_ssh_auth_mode: "keys_only"
 
         # Updates
         debian_hardening_enable_weekly_upgrade: true   # set to false to keep daily

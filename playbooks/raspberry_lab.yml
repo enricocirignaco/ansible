@@ -27,10 +27,8 @@
     raspberry_expand_rootfs: false
     debian_hardening_disable_services: ["bluetooth"]
     debian_hardening_ssh_allow_groups: ["admin", "sudo"]
+    debian_hardening_ssh_auth_mode: "keys_only"
     debian_hardening_ssh_permit_root_login: "no"
-    debian_hardening_ssh_password_auth: false
-    debian_hardening_ssh_kbdinteractive_auth: false
-    debian_hardening_ssh_pubkey_auth: true
     debian_hardening_ssh_max_auth_tries: 3
     debian_hardening_ssh_login_grace_time: "30s"
     debian_hardening_ssh_client_alive_interval: 300

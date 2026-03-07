@@ -1,13 +1,14 @@
 # Managed by Ansible (debian_hardening role)
 # Basic SSH hardening for Debian
+{% set ssh_auth_mode = debian_hardening_ssh_auth_mode %}
 
 # Root login policy
 PermitRootLogin {{ debian_hardening_ssh_permit_root_login }}
 
 # Authentication methods
-PasswordAuthentication {{ debian_hardening_ssh_password_auth | bool | ternary('yes','no') }}
-KbdInteractiveAuthentication {{ debian_hardening_ssh_kbdinteractive_auth | bool | ternary('yes','no') }}
-PubkeyAuthentication {{ debian_hardening_ssh_pubkey_auth | bool | ternary('yes','no') }}
+PasswordAuthentication {{ (ssh_auth_mode in ['password_only', 'keys_and_password']) | ternary('yes','no') }}
+KbdInteractiveAuthentication {{ (ssh_auth_mode in ['password_only', 'keys_and_password']) | ternary('yes','no') }}
+PubkeyAuthentication {{ (ssh_auth_mode in ['keys_only', 'keys_and_password']) | ternary('yes','no') }}
 
 # Limits and timeouts
 MaxAuthTries {{ debian_hardening_ssh_max_auth_tries }}

@@ -28,6 +28,13 @@
   notify: Restart sshd
   tags: [ssh, hardening]
 
+- name: Validate SSH auth mode
+  ansible.builtin.assert:
+    that:
+      - debian_hardening_ssh_auth_mode in ['keys_only', 'password_only', 'keys_and_password']
+    fail_msg: "debian_hardening_ssh_auth_mode must be one of: keys_only, password_only, keys_and_password."
+  tags: [ssh, hardening]
+
 - name: Deploy SSH hardening configuration (templated)
   ansible.builtin.template:
     src: hardening_ssh.conf.j2
