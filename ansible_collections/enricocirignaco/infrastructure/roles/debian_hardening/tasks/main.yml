@@ -83,7 +83,7 @@
     owner: root
     group: root
     mode: "0755"
-  when: hardening_enable_weekly_upgrade | default(true)
+  when: debian_hardening_enable_weekly_upgrade | bool
   tags: [updates, hardening]
 
 - name: Deploy systemd timer override for weekly security-only upgrades
@@ -93,14 +93,14 @@
     owner: root
     group: root
     mode: "0644"
-  when: hardening_enable_weekly_upgrade | default(true)
+  when: debian_hardening_enable_weekly_upgrade | bool
   tags: [updates, hardening]
 
 - name: Remove weekly override when disabled
   ansible.builtin.file:
     path: /etc/systemd/system/apt-daily-upgrade.timer.d/override.conf
     state: absent
-  when: not (hardening_enable_weekly_upgrade | default(true))
+  when: not (debian_hardening_enable_weekly_upgrade | bool)
   tags: [updates, hardening]
 
 - name: Ensure apt-daily-upgrade.timer is enabled and started
@@ -117,7 +117,7 @@
     enabled: false
     state: stopped
     masked: true
-  when: hardening_disable_apt_daily_index_timer | default(true)
+  when: debian_hardening_disable_apt_daily_index_timer | bool
   tags: [updates, hardening]
 
 - name: Enforce permissions on sensitive system files
@@ -165,10 +165,10 @@
     enabled: false
     state: stopped
     masked: true
-  loop: "{{ hardening_disable_services | default([]) }}"
-  when: hardening_disable_services | default([]) | length > 0
+  loop: "{{ debian_hardening_disable_services }}"
+  when: debian_hardening_disable_services | length > 0
   tags: [services, hardening]
 
 - import_tasks: persistent_logs.yml
-  when: debian_hardening_enable_persistent_logs | default(false)
+  when: debian_hardening_enable_persistent_logs | bool
   tags: [journald, logging]

@@ -6,32 +6,36 @@ This role applies a pragmatic Debian hardening baseline suitable for Raspberry P
 Requirements
 ------------
 
-- Ansible 2.1+
+- Ansible 2.14+
 - `systemd` (used for unattended-upgrades weekly timer)
 
 Role Variables
 --------------
 
 - SSH hardening
-  - `ssh_password_auth` (bool, default: false)
-  - `ssh_kbdinteractive_auth` (bool, default: false)
-  - `ssh_pubkey_auth` (bool, default: true)
-  - `ssh_permit_root_login` (string, default: "no")
-  - `ssh_max_auth_tries` (int, default: 3)
-  - `ssh_login_grace_time` (string, default: "30s")
-  - `ssh_client_alive_interval` (int, default: 300)
-  - `ssh_client_alive_count_max` (int, default: 2)
-  - `ssh_allow_groups` (list, default: ["sudo"]) — rendered as space-separated groups
+  - `debian_hardening_ssh_password_auth` (bool, default: false)
+  - `debian_hardening_ssh_kbdinteractive_auth` (bool, default: false)
+  - `debian_hardening_ssh_pubkey_auth` (bool, default: true)
+  - `debian_hardening_ssh_permit_root_login` (string, default: "no")
+  - `debian_hardening_ssh_max_auth_tries` (int, default: 3)
+  - `debian_hardening_ssh_login_grace_time` (string, default: "30s")
+  - `debian_hardening_ssh_client_alive_interval` (int, default: 300)
+  - `debian_hardening_ssh_client_alive_count_max` (int, default: 2)
+  - `debian_hardening_ssh_allow_groups` (list, default: ["sudo"]) — rendered as space-separated groups
 
 - Updates
-  - `hardening_enable_weekly_upgrade` (bool, default: true)
+  - `debian_hardening_enable_weekly_upgrade` (bool, default: true)
     - true: install a systemd drop-in to run unattended-upgrades weekly
     - false: remove the drop-in and fall back to Debian’s default daily schedule
-  - `hardening_disable_apt_daily_index_timer` (bool, default: true)
+  - `debian_hardening_disable_apt_daily_index_timer` (bool, default: true)
     - when true, disables/masks `apt-daily.timer` (daily APT index refresh)
 
 - Services
-  - `hardening_disable_services` (list, default: []) — units to disable/stop/mask
+  - `debian_hardening_disable_services` (list, default: []) — units to disable/stop/mask
+- Logging
+  - `debian_hardening_enable_persistent_logs` (bool, default: false)
+  - `debian_hardening_logs_max_size` (string, default: "100M")
+  - `debian_hardening_logs_retention` (string, default: "1month")
 
 Files
 -----
@@ -58,17 +62,17 @@ Example Playbook
 - hosts: managed
   become: true
   roles:
-    - role: debian_hardening
+    - role: enricocirignaco.infrastructure.debian_hardening
       vars:
         # SSH policy
-        ssh_allow_groups: ["sudo", "ansible"]
+        debian_hardening_ssh_allow_groups: ["sudo", "ansible"]
 
         # Updates
-        hardening_enable_weekly_upgrade: true   # set to false to keep daily
-        hardening_disable_apt_daily_index_timer: true
+        debian_hardening_enable_weekly_upgrade: true   # set to false to keep daily
+        debian_hardening_disable_apt_daily_index_timer: true
 
         # Optional service controls
-        hardening_disable_services:
+        debian_hardening_disable_services:
           - avahi-daemon
 ```
 
