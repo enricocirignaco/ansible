@@ -2,9 +2,8 @@
 ---
 # defaults file for roles/debian_hardening
 # SSH policy
-# valid values: keys_only | password_only | keys_and_password
-debian_hardening_ssh_auth_mode: "keys_only"
-debian_hardening_ssh_permit_root_login: "no"      # "no" | "prohibit-password" | "yes"
+debian_hardening_ssh_auth_mode: "keys_only"       # keys_only | password_only | keys_and_password
+debian_hardening_ssh_permit_root_login: "no"      # no | prohibit-password | yes
 debian_hardening_ssh_max_auth_tries: 3
 debian_hardening_ssh_login_grace_time: "30s"
 debian_hardening_ssh_client_alive_interval: 300
