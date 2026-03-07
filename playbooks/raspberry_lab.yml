@@ -8,7 +8,7 @@
     - common
     - raspberry
     - debian_hardening
-    - network
+    - debian_network
     - docker
   vars:
     debian_update_mode: "full"
@@ -33,10 +33,10 @@
     debian_hardening_ssh_login_grace_time: "30s"
     debian_hardening_ssh_client_alive_interval: 300
     debian_hardening_ssh_client_alive_count_max: 2
-    network_interface: "eth0"
-    network_address: "192.168.1.130/24"
-    network_gateway: "192.168.1.1"
-    network_dns: ["127.0.0.1", "192.168.1.126"]
+    debian_network_interface: "eth0"
+    debian_network_address: "192.168.1.130/24"
+    debian_network_gateway: "192.168.1.1"
+    debian_network_dns: ["127.0.0.1", "192.168.1.126"]
   vars_files:
     - ../inventory/group_vars/prod-vault.yaml
 

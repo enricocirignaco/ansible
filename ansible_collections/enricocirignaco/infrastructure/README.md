@@ -8,7 +8,7 @@ Infrastructure automation collection for Debian and Raspberry Pi hosts.
 - `common`: baseline host configuration (packages, locale, timezone, users).
 - `debian_hardening`: practical hardening defaults for SSH, updates, and sysctl.
 - `debian_update`: host patching and controlled reboot flow.
-- `network`: NetworkManager-based interface configuration and discovery behavior.
+- `debian_network`: NetworkManager-based interface configuration and discovery behavior.
 - `raspberry`: Raspberry Pi hardware and boot-level baseline.
 - `docker`: Docker Engine installation and daemon tuning.
 - `komodo`: Komodo stack deployment with Docker Compose.

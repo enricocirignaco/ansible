@@ -4,32 +4,32 @@
 - name: Preflight | Ensure required variables are defined
   ansible.builtin.assert:
     that:
-      - network_interface is defined and network_interface is string
-      - network_method_v4 is defined
-      - network_method_v4 in ['static', 'dhcp']
+      - debian_network_interface is defined and debian_network_interface is string
+      - debian_network_method_v4 is defined
+      - debian_network_method_v4 in ['static', 'dhcp']
 
     fail_msg: >-
-      Missing required variables. You must define network_interface and
-      network_method_v4 ('static' or 'dhcp').
+      Missing required variables. You must define debian_network_interface and
+      debian_network_method_v4 ('static' or 'dhcp').
   tags: [network]
 
 - name: Preflight | Ensure static IPv4 variables are defined
   ansible.builtin.assert:
     that:
-      - "'/' in network_address"
-      - (network_address | ansible.utils.ipaddr('address')) is ansible.utils.ipv4
-      - network_gateway is defined and network_gateway is ansible.utils.ipv4
-      - network_dns is defined and network_dns is iterable
-      - network_dns | select('ansible.utils.ipv4') | list | length == (network_dns | length)
+      - "'/' in debian_network_address"
+      - (debian_network_address | ansible.utils.ipaddr('address')) is ansible.utils.ipv4
+      - debian_network_gateway is defined and debian_network_gateway is ansible.utils.ipv4
+      - debian_network_dns is defined and debian_network_dns is iterable
+      - debian_network_dns | select('ansible.utils.ipv4') | list | length == (debian_network_dns | length)
 
     fail_msg: >-
       Missing required variables for static IPv4 config. You must define
-      network_address, network_gateway, and network_dns (list). Example:
-      network_interface: eth0
-      network_address: 192.168.1.157/24
-      network_gateway: 192.168.1.1
-      network_dns: ["192.168.1.1", "1.1.1.1"]
-  when: network_method_v4 == 'static'
+      debian_network_address, debian_network_gateway, and debian_network_dns (list). Example:
+      debian_network_interface: eth0
+      debian_network_address: 192.168.1.157/24
+      debian_network_gateway: 192.168.1.1
+      debian_network_dns: ["192.168.1.1", "1.1.1.1"]
+  when: debian_network_method_v4 == 'static'
   tags: [network]
 
 - name: Ensure arping tool is installed
@@ -42,22 +42,22 @@
 
 - name: Probe for duplicate IP on the LAN (ARP DAD)
   ansible.builtin.command: >
-    arping -D -I {{ network_interface }} -c 2 -w 2 {{ network_address | ansible.utils.ipaddr('address') }}
+    arping -D -I {{ debian_network_interface }} -c 2 -w 2 {{ debian_network_address | ansible.utils.ipaddr('address') }}
   register: _arping
   changed_when: false
   failed_when: false
   become: true
-  when: network_method_v4 == 'static'
+  when: debian_network_method_v4 == 'static'
   tags: [network]
 
 - name: Abort if desired IP is already in use
   ansible.builtin.fail:
     msg: >
-      IP {{ network_address | ansible.utils.ipaddr('address') }} appears to be in use on the local network
+      IP {{ debian_network_address | ansible.utils.ipaddr('address') }} appears to be in use on the local network
       (ARP replies seen). Aborting to prevent an address conflict.
       arping output: {{ _arping.stdout | default('') }} {{ _arping.stderr | default('') }}
   when:
-    - network_method_v4 == 'static'
+    - debian_network_method_v4 == 'static'
     - _arping.rc == 1
   tags: [network]
 
@@ -79,14 +79,14 @@
 
 - name: Configure IPv4 connection with NetworkManager
   community.general.nmcli:
-    conn_name: "{{ network_interface }}"
-    ifname: "{{ network_interface }}"
-    type: "{{ network_type }}"
+    conn_name: "{{ debian_network_interface }}"
+    ifname: "{{ debian_network_interface }}"
+    type: "{{ debian_network_type }}"
     autoconnect: yes
-    method4: "{{ 'manual' if network_method_v4 == 'static' else 'auto' }}"
-    ip4: "{{ (network_method_v4 == 'static') | ternary(network_address, omit) }}"
-    gw4: "{{ (network_method_v4 == 'static') | ternary(network_gateway, omit) }}"
-    dns4: "{{ (network_method_v4 == 'static') | ternary(network_dns, omit) }}"
+    method4: "{{ 'manual' if debian_network_method_v4 == 'static' else 'auto' }}"
+    ip4: "{{ (debian_network_method_v4 == 'static') | ternary(debian_network_address, omit) }}"
+    gw4: "{{ (debian_network_method_v4 == 'static') | ternary(debian_network_gateway, omit) }}"
+    dns4: "{{ (debian_network_method_v4 == 'static') | ternary(debian_network_dns, omit) }}"
     state: present
   become: true
   register: nmcli_result
@@ -94,13 +94,13 @@
 
 - name: Disable IPv6 on this connection
   community.general.nmcli:
-    conn_name: "{{ network_interface }}"
+    conn_name: "{{ debian_network_interface }}"
     method6: ignore
     state: present
   become: true
   register: nmcli_ipv6_result
   tags: [network]
-  when: network_disable_ipv6
+  when: debian_network_disable_ipv6
 
 - name: Activate Avahi (mDNS)
   ansible.builtin.systemd:
@@ -119,7 +119,7 @@
   poll: 0
   ignore_errors: true
   when:
-    - network_reboot_if_changed
+    - debian_network_reboot_if_changed
     - >
       (
         (nmcli_result is defined and nmcli_result.changed)

@@ -1,5 +1,5 @@
-Network Role
-============
+Debian network role
+===================
 
 Configure NetworkManager connections (IPv4 static or DHCP, IPv6 policy, discovery).
 
@@ -7,7 +7,7 @@ Requirements
 ------------
 
 - NetworkManager on the target host (the role will install it on Debian-based systems).
-- Ansible 2.9+ recommended.
+- Ansible 2.14+.
 - Collections:
   - community.general (provides nmcli)
   - ansible.utils (provides ipaddr test/filter)
@@ -17,19 +17,20 @@ Role Variables
 
 Mandatory variables (must be provided via inventory / host_vars / group_vars):
 
-- network_interface (string) — interface name, e.g., "eth0"
-- network_method_v4 (string, default: "static") — IPv4 method ("static" or "dhcp")
+- debian_network_interface (string) — interface name, e.g., "eth0"
+- debian_network_method_v4 (string, default: "dhcp") — IPv4 method ("static" or "dhcp")
 
-Required when network_method_v4 = "static":
+Required when debian_network_method_v4 = "static":
 
-- network_address (CIDR) — IPv4 with prefix, e.g., "192.168.1.157/24"
-- network_gateway (ip) — IPv4 gateway, e.g., "192.168.1.1"
-- network_dns (list of ip) — DNS servers, e.g., ["192.168.1.1", "1.1.1.1"]
+- debian_network_address (CIDR) — IPv4 with prefix, e.g., "192.168.1.157/24"
+- debian_network_gateway (ip) — IPv4 gateway, e.g., "192.168.1.1"
+- debian_network_dns (list of ip) — DNS servers, e.g., ["192.168.1.1", "1.1.1.1"]
 
 Optional variables:
 
-- network_type (string, default: "ethernet") — connection type ("ethernet" or "wifi")
-- network_disable_ipv6 (bool, default: true) — disable IPv6 on the connection via nmcli
+- debian_network_type (string, default: "ethernet") — connection type ("ethernet" or "wifi")
+- debian_network_disable_ipv6 (bool, default: true) — disable IPv6 on the connection via nmcli
+- debian_network_reboot_if_changed (bool, default: true) — reboot after network changes are applied
 
 Files
 -----
@@ -42,9 +43,9 @@ What the role does
 
 - Installs network-manager package on Debian-based systems and ensures the NetworkManager service is enabled and running.
 - Configures an IPv4 connection using community.general.nmcli (static or DHCP) with provided address, gateway, DNS, type, and connection name.
-- Optionally sets ipv6_method=ignore on the connection when network_disable_ipv6 is true.
+- Optionally sets ipv6_method=ignore on the connection when debian_network_disable_ipv6 is true.
 - Manages discovery services: can enable avahi-daemon and set LLMNR=no in systemd-resolved configuration.
-- Registers task results (nmcli changes, IPv6 change, service changes) so you can decide whether to trigger a reboot (controlled by network_reboot_if_changed).
+- Registers task results (nmcli changes, IPv6 change, service changes) so you can decide whether to trigger a reboot (controlled by debian_network_reboot_if_changed).
 
 Example Playbook
 ----------------
@@ -53,13 +54,13 @@ Example Playbook
 - hosts: all
   become: true
   roles:
-    - role: network
+    - role: debian_network
       vars:
-        network_interface: eth0
-        network_method_v4: static
-        network_address: 192.168.1.157/24
-        network_gateway: 192.168.1.1
-        network_dns:
+        debian_network_interface: eth0
+        debian_network_method_v4: static
+        debian_network_address: 192.168.1.157/24
+        debian_network_gateway: 192.168.1.1
+        debian_network_dns:
           - 192.168.1.1
           - 1.1.1.1
 ```
@@ -70,10 +71,10 @@ DHCP example:
 - hosts: all
   become: true
   roles:
-    - role: network
+    - role: debian_network
       vars:
-        network_interface: eth0
-        network_method_v4: dhcp
+        debian_network_interface: eth0
+        debian_network_method_v4: dhcp
 ```
 
 License
@@ -90,5 +91,5 @@ Notes
 -----
 
 - The role registers nmcli and other task results and exposes .changed flags so playbooks can make safe decisions about restarting or rebooting.
-- Network changes do not always require a reboot. nmcli reports whether it changed state; use network_reboot_if_changed to opt in to reboots only when changes occurred.
+- Network changes do not always require a reboot. nmcli reports whether it changed state; use debian_network_reboot_if_changed to opt in to reboots only when changes occurred.
 - Ensure the required collections are available (via requirements.yml or galaxy install) before running the role on a control node that enforces collection usage.

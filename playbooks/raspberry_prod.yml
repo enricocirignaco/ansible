@@ -8,7 +8,7 @@
     - common
     - raspberry
     - debian_hardening
-    - network
+    - debian_network
     - docker
     - komodo
     - backup
@@ -39,8 +39,8 @@
     debian_hardening_ssh_client_alive_interval: 300
     debian_hardening_ssh_client_alive_count_max: 2
     debian_hardening_enable_persistent_logs: true
-    network_interface: "eth0"
-    network_method_v4: "dhcp"
+    debian_network_interface: "eth0"
+    debian_network_method_v4: "dhcp"
     docker_data_mountpoint: /mnt/data
     docker_data_root: /mnt/data/docker-data
     docker_containerd_root: /mnt/data/docker-data/containerd

@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for roles/debian_network
+debian_network_disable_ipv6: true
+debian_network_method_v4: dhcp
+debian_network_type: ethernet
+debian_network_reboot_if_changed: true
