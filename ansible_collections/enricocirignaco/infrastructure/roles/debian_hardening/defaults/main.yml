@@ -2,22 +2,22 @@
 ---
 # defaults file for roles/debian_hardening
 # SSH policy
-debian_hardening_ssh_password_auth: "{{ ssh_password_auth | default(false) }}"
-debian_hardening_ssh_kbdinteractive_auth: "{{ ssh_kbdinteractive_auth | default(false) }}"
-debian_hardening_ssh_pubkey_auth: "{{ ssh_pubkey_auth | default(true) }}"
-debian_hardening_ssh_permit_root_login: "{{ ssh_permit_root_login | default('no') }}"      # "no" | "prohibit-password" | "yes"
-debian_hardening_ssh_max_auth_tries: "{{ ssh_max_auth_tries | default(3) }}"
-debian_hardening_ssh_login_grace_time: "{{ ssh_login_grace_time | default('30s') }}"
-debian_hardening_ssh_client_alive_interval: "{{ ssh_client_alive_interval | default(300) }}"
-debian_hardening_ssh_client_alive_count_max: "{{ ssh_client_alive_count_max | default(2) }}"
-debian_hardening_ssh_allow_groups: "{{ ssh_allow_groups | default(['sudo']) }}"
+debian_hardening_ssh_password_auth: false
+debian_hardening_ssh_kbdinteractive_auth: false
+debian_hardening_ssh_pubkey_auth: true
+debian_hardening_ssh_permit_root_login: "no"      # "no" | "prohibit-password" | "yes"
+debian_hardening_ssh_max_auth_tries: 3
+debian_hardening_ssh_login_grace_time: "30s"
+debian_hardening_ssh_client_alive_interval: 300
+debian_hardening_ssh_client_alive_count_max: 2
+debian_hardening_ssh_allow_groups: ["sudo"]
 
 # Weekly upgrades instead of daily
-debian_hardening_enable_weekly_upgrade: "{{ hardening_enable_weekly_upgrade | default(true) }}"
-debian_hardening_disable_apt_daily_index_timer: "{{ hardening_disable_apt_daily_index_timer | default(true) }}"
+debian_hardening_enable_weekly_upgrade: true
+debian_hardening_disable_apt_daily_index_timer: true
 
 # Optional service disables
-debian_hardening_disable_services: "{{ hardening_disable_services | default([]) }}"
+debian_hardening_disable_services: []
 
 debian_hardening_logs_max_size: "100M"
 debian_hardening_logs_retention: "1month"

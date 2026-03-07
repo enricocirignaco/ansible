@@ -25,16 +25,16 @@
     common_hostname: "srvlab01"
     raspberry_disable_pi_user: true
     raspberry_expand_rootfs: false
-    hardening_disable_services: ["bluetooth"]
-    ssh_allow_groups: ["admin", "sudo"]
-    ssh_permit_root_login: "no"
-    ssh_password_auth: false
-    ssh_kbdinteractive_auth: false
-    ssh_pubkey_auth: true
-    ssh_max_auth_tries: 3
-    ssh_login_grace_time: "30s"
-    ssh_client_alive_interval: 300
-    ssh_client_alive_count_max: 2
+    debian_hardening_disable_services: ["bluetooth"]
+    debian_hardening_ssh_allow_groups: ["admin", "sudo"]
+    debian_hardening_ssh_permit_root_login: "no"
+    debian_hardening_ssh_password_auth: false
+    debian_hardening_ssh_kbdinteractive_auth: false
+    debian_hardening_ssh_pubkey_auth: true
+    debian_hardening_ssh_max_auth_tries: 3
+    debian_hardening_ssh_login_grace_time: "30s"
+    debian_hardening_ssh_client_alive_interval: 300
+    debian_hardening_ssh_client_alive_count_max: 2
     network_interface: "eth0"
     network_address: "192.168.1.130/24"
     network_gateway: "192.168.1.1"
