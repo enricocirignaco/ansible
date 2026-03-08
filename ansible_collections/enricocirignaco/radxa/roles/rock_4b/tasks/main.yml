@@ -44,7 +44,7 @@
   become: true
   when: rock_4b_remove_kde_desktop | bool
 
-- name: Boot to cli instead of desktop
+- name: Boot to CLI instead of desktop
   ansible.builtin.file:
     path: /etc/systemd/system/default.target
     state: link
@@ -111,13 +111,13 @@
 - name: Check if a reboot is required
   ansible.builtin.stat:
     path: /var/run/reboot-required
-  register: reboot_required
+  register: rock_4b_reboot_required
   tags: [update, reboot]
 
 - name: Log reboot requirement status
   ansible.builtin.debug:
     msg: >-
-      Reboot required: {{ reboot_required.stat.exists | bool }}.
+      Reboot required: {{ rock_4b_reboot_required.stat.exists | bool }}.
       Auto reboot enabled: {{ rock_4b_reboot_if_required | bool }}.
   tags: [update, reboot]
 
@@ -127,6 +127,6 @@
     reboot_timeout: 600
   when:
     - rock_4b_reboot_if_required | bool
-    - reboot_required.stat.exists or (rock_4b_hdmi_disable_result is defined and rock_4b_hdmi_disable_result.changed)
+    - rock_4b_reboot_required.stat.exists or (rock_4b_hdmi_disable_result is defined and rock_4b_hdmi_disable_result.changed)
   become: true
   tags: [update, reboot]

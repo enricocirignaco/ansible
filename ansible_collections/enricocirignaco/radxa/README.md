@@ -6,15 +6,9 @@ Radxa-focused Ansible collection for board provisioning and system configuration
 
 This collection is intended for automation that is specific to Radxa devices and their operating system images.
 
-## Current status
+## Included roles
 
-The collection structure is initialized and ready for roles, modules, and plugins.
-As content is added, this README should be updated with:
-
-- Included roles and plugins
-- Supported boards and OS variants
-- Required inventory variables
-- Example playbooks
+- `rock_4b`: baseline cleanup and hardening for Radxa ROCK Pi 4B hosts.
 
 ## Requirements
 

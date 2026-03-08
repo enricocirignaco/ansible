@@ -27,6 +27,10 @@ User-tunable defaults are in `defaults/main.yml`. Internal constants are in `var
 - `rock_4b_reboot_if_required` (bool, default: `true`)
 - `rock_4b_extra_desktop_packages` (additional package names to purge)
 
+Internal constants in `vars/main.yml`:
+
+- `rock_4b_expected_model`
+
 ## Example playbook
 
 ```yaml
