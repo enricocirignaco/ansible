@@ -164,6 +164,14 @@ Run playbook on production server:
 ```bash
  ansible-playbook playbooks/raspberry_prod.yml --skip-tags reboot --ask-vault-pass
 ```
+Create a new ansible collection:
+```bash
+cd ansible_collections
+ansible-galaxy collection init enricocirignaco.mycollection
+```
+Create a new role within the collection:
+```bash
+ansible-galaxy role init --collection enricocirignaco.mycollection myrole
 ---
 ## Roles
 
