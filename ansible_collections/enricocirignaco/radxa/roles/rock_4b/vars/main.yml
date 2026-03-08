@@ -9,24 +9,9 @@ rock_4b_boot_env_candidates:
 
 # Base package set for removing KDE and desktop-related components.
 rock_4b_desktop_packages:
-  - kde-plasma-desktop
-  - kde-standard
-  - kde-full
-  - plasma-desktop
-  - plasma-workspace
-  - plasma-nm
-  - sddm
-  - lightdm
-  - gdm3
-  - xorg
-  - xserver-xorg
-  - x11-common
-  - x11-utils
-  - x11-xserver-utils
-  - xinit
-  - wayland-protocols
-  - task-desktop
   - task-kde-desktop
+  - task-desktop
+  - kde-standard
 
 # Kernel argument injected in boot env to disable HDMI output.
 rock_4b_hdmi_disable_kernel_arg: "video=HDMI-A-1:d"
