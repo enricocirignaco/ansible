@@ -37,6 +37,7 @@
 
 - name: Remove KDE and desktop package set
   ansible.builtin.apt:
+    autoremove: true
     name: "{{ rock_4b_desktop_packages }}"
     state: absent
     purge: true
@@ -71,14 +72,6 @@
     - rock_4b_remove_kde_desktop | bool
     - ansible_facts.services is defined
     - item in ansible_facts.services
-
-- name: Remove desktop dependencies left behind
-  ansible.builtin.apt:
-    autoremove: true
-    purge: true
-  become: true
-  register: rock_4b_desktop_autoremove_result
-  when: rock_4b_remove_kde_desktop | bool
 
 # Remove radxa and rock users if requested
 - name: Remove radxa user
