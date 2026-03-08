@@ -33,30 +33,30 @@
 # Remove KDE desktop and related components if requested
 - name: Remove KDE and desktop package set
   ansible.builtin.apt:
-    autoremove: true
-    name: "{{ item }}"
+    name:
+      - task-kde-desktop
+      - task-desktop
+      - kde-standard
+      - plasma-desktop
+      - plasma-workspace
+      - plasma-workspace-wayland
+      - kwin-x11
+      - kwin-wayland
+      - kded5
+      - kscreen
+      - kdeconnect
+      - bluedevil
+      - yakuake
+      - khelpcenter
+      - kfind
+      - polkit-kde-agent-1
+      - xdg-desktop-portal-kde
     state: absent
     purge: true
-  loop:
-    - task-kde-desktop
-    - task-desktop
-    - kde-standard
-    - plasma-desktop
-    - plasma-workspace
-    - plasma-workspace-wayland
-    - kwin-x11
-    - kwin-wayland
-    - kded5
-    - kscreen
-    - kdeconnect
-    - bluedevil
-    - yakuake
-    - khelpcenter
-    - kfind
-    - polkit-kde-agent-1
-    - xdg-desktop-portal-kde
+    autoremove: true
   become: true
   when: rock_4b_remove_kde_desktop | bool
+
 
 - name: Boot to CLI instead of desktop
   ansible.builtin.file:
