@@ -103,6 +103,8 @@
     owner: root
     group: root
     mode: "0644"
+  become: true
+  register: rock_4b_hdmi_disable_result
   when: rock_4b_disable_hdmi | bool
 
 # Reboot if required
@@ -121,10 +123,10 @@
 
 - name: Reboot if required
   ansible.builtin.reboot:
-    msg: "Rebooting after kernel/libc update."
+    msg: "Rebooting to apply Rock 4B configuration changes."
     reboot_timeout: 600
   when:
-    - reboot_required.stat.exists
     - rock_4b_reboot_if_required | bool
+    - reboot_required.stat.exists or (rock_4b_hdmi_disable_result is defined and rock_4b_hdmi_disable_result.changed)
   become: true
   tags: [update, reboot]

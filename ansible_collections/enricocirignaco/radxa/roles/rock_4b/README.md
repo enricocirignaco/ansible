@@ -8,7 +8,7 @@ Hardening and cleanup baseline for Radxa Rock 4B hosts.
 - Removes KDE plus desktop-related packages when enabled
 - Stops/disables common display manager services
 - Removes default users (`radxa`, `rock`) when enabled
-- Disables HDMI by appending `video=HDMI-A-1:d` to boot `extraargs`
+- Disables HDMI by writing a `rockchipdrm` blacklist file in `/etc/modprobe.d/`
 - Reboots when required changes are applied
 
 ## Requirements
