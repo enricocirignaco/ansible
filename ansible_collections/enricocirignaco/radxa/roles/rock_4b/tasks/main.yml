@@ -51,6 +51,8 @@
       - kfind
       - polkit-kde-agent-1
       - xdg-desktop-portal-kde
+      - sddm
+      - gdm3
     state: absent
     purge: true
     autoremove: true
