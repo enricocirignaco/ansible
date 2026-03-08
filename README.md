@@ -171,7 +171,8 @@ ansible-galaxy collection init enricocirignaco.mycollection
 ```
 Create a new role within the collection:
 ```bash
-ansible-galaxy role init --collection enricocirignaco.mycollection myrole
+ansible-galaxy role init --init-path ansible_collections/enricocirignaco/mycollection/roles myrole
+```
 ---
 ## Roles
 
