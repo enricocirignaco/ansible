@@ -30,34 +30,31 @@
       - rock_4b_model == rock_4b_expected_model
     fail_msg: "This host does not look like a Rock 4B. Detected model: {{ rock_4b_model | default('unknown') }}"
 
-# Remove KDE desktop and related components if requested
-- name: Remove KDE and desktop package set
+- name: Remove KDE Plasma desktop
   ansible.builtin.apt:
     name:
       - task-kde-desktop
-      - task-desktop
       - kde-standard
-      - plasma-desktop
-      - plasma-workspace
-      - plasma-workspace-wayland
-      - kwin-x11
-      - kwin-wayland
-      - kded5
-      - kscreen
-      - kdeconnect
-      - bluedevil
-      - yakuake
-      - khelpcenter
-      - kfind
-      - polkit-kde-agent-1
-      - xdg-desktop-portal-kde
-      - sddm
-      - gdm3
+      - kde-full
+      - task-desktop
     state: absent
     purge: true
-    autoremove: true
-  become: true
   when: rock_4b_remove_kde_desktop | bool
+
+- name: Remove display managers
+  ansible.builtin.apt:
+    name:
+      - sddm
+      - gdm3
+      - lightdm
+    state: absent
+    purge: true
+  when: rock_4b_remove_kde_desktop | bool
+
+- name: Autoremove leftover packages
+  ansible.builtin.apt:
+    autoremove: true
+    purge: true
 
 
 - name: Boot to CLI instead of desktop
