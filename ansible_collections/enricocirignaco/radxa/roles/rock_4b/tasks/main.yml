@@ -31,18 +31,17 @@
     fail_msg: "This host does not look like a Rock 4B. Detected model: {{ rock_4b_model | default('unknown') }}"
 
 # Remove KDE desktop and related components if requested
-- name: Gather service facts
-  ansible.builtin.service_facts:
-  when: rock_4b_remove_kde_desktop | bool
-
 - name: Remove KDE and desktop package set
   ansible.builtin.apt:
     autoremove: true
-    name: "{{ rock_4b_desktop_packages }}"
+    name: "{{ item }}"
     state: absent
     purge: true
+  loop:
+    - task-kde-desktop
+    - task-desktop
+    - kde-standard
   become: true
-  register: rock_4b_desktop_packages_removed
   when: rock_4b_remove_kde_desktop | bool
 
 - name: Boot to cli instead of desktop
@@ -52,7 +51,10 @@
     src: /lib/systemd/system/multi-user.target
     force: true
   become: true
-  register: rock_4b_systemd_target_result
+  when: rock_4b_remove_kde_desktop | bool
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
   when: rock_4b_remove_kde_desktop | bool
 
 - name: Stop and disable known display manager services
@@ -67,7 +69,6 @@
     - gdm.service
     - lxdm.service
   become: true
-  register: rock_4b_display_manager_result
   when:
     - rock_4b_remove_kde_desktop | bool
     - ansible_facts.services is defined
@@ -94,77 +95,15 @@
   register: rock_4b_remove_rock_user_result
   when: rock_4b_remove_rock_user | bool
 
-- name: Detect boot environment config path
-  ansible.builtin.stat:
-    path: "{{ item }}"
-  loop: "{{ rock_4b_boot_env_candidates }}"
-  register: rock_4b_boot_env_stats
+# Disable HDMI output
+- name: Disable HDMI output
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/disable-rockchip-hdmi.conf
+    content: "blacklist rockchipdrm\n"
+    owner: root
+    group: root
+    mode: "0644"
   when: rock_4b_disable_hdmi | bool
-
-- name: Select first existing boot environment config
-  ansible.builtin.set_fact:
-    rock_4b_boot_env_path: >-
-      {{
-        (
-          rock_4b_boot_env_stats.results
-          | selectattr('stat.exists', 'equalto', true)
-          | map(attribute='stat.path')
-          | list
-          | first
-        ) | default('')
-      }}
-  when: rock_4b_disable_hdmi | bool
-
-- name: Read boot environment config
-  ansible.builtin.slurp:
-    path: "{{ rock_4b_boot_env_path }}"
-  register: rock_4b_boot_env_raw
-  when:
-    - rock_4b_disable_hdmi | bool
-    - rock_4b_boot_env_path | length > 0
-
-- name: Build extraargs value with HDMI disabled
-  ansible.builtin.set_fact:
-    rock_4b_boot_extraargs_current: >-
-      {{
-        (
-          (rock_4b_boot_env_raw.content | b64decode)
-          | regex_search('(?m)^extraargs=.*$')
-          | default('')
-          | regex_replace('^extraargs=', '')
-          | trim
-        )
-      }}
-    rock_4b_boot_extraargs_new: >-
-      {{
-        (
-          rock_4b_boot_extraargs_current
-          if (rock_4b_boot_extraargs_current is search('(^|\\s)' ~ (rock_4b_hdmi_disable_kernel_arg | regex_escape) ~ '(\\s|$)'))
-          else ((rock_4b_boot_extraargs_current ~ ' ' ~ rock_4b_hdmi_disable_kernel_arg) | trim)
-        )
-      }}
-  when:
-    - rock_4b_disable_hdmi | bool
-    - rock_4b_boot_env_path | length > 0
-
-- name: Ensure HDMI disable kernel argument is present
-  ansible.builtin.lineinfile:
-    path: "{{ rock_4b_boot_env_path }}"
-    regexp: '^extraargs='
-    line: "extraargs={{ rock_4b_boot_extraargs_new }}"
-    insertafter: EOF
-  become: true
-  register: rock_4b_hdmi_disable_result
-  when:
-    - rock_4b_disable_hdmi | bool
-    - rock_4b_boot_env_path | length > 0
-
-- name: Warn when no known boot env file is found for HDMI disable
-  ansible.builtin.debug:
-    msg: "Could not find a boot env file in {{ rock_4b_boot_env_candidates }}. HDMI disable step was skipped."
-  when:
-    - rock_4b_disable_hdmi | bool
-    - rock_4b_boot_env_path | default('') | length == 0
 
 # Reboot if required
 - name: Check if a reboot is required
