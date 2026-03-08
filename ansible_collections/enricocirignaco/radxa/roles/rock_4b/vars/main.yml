@@ -1,3 +1,32 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # vars file for rock_4b
+rock_4b_reboot_timeout: 600
+rock_4b_expected_model: "Radxa ROCK Pi 4B"
+rock_4b_boot_env_candidates:
+  - /boot/armbianEnv.txt
+  - /boot/uEnv.txt
+
+# Base package set for removing KDE and desktop-related components.
+rock_4b_desktop_packages:
+  - kde-plasma-desktop
+  - kde-standard
+  - kde-full
+  - plasma-desktop
+  - plasma-workspace
+  - plasma-nm
+  - sddm
+  - lightdm
+  - gdm3
+  - xorg
+  - xserver-xorg
+  - x11-common
+  - x11-utils
+  - x11-xserver-utils
+  - xinit
+  - wayland-protocols
+  - task-desktop
+  - task-kde-desktop
+
+# Kernel argument injected in boot env to disable HDMI output.
+rock_4b_hdmi_disable_kernel_arg: "video=HDMI-A-1:d"

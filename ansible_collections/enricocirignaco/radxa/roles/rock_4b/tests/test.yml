@@ -3,4 +3,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - rock_4b
+    - enricocirignaco.radxa.rock_4b

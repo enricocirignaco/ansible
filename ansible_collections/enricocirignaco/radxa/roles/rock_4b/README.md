@@ -1,38 +1,41 @@
-Role Name
-=========
+# enricocirignaco.radxa.rock_4b
 
-A brief description of the role goes here.
+Hardening and cleanup baseline for Radxa Rock 4B hosts.
 
-Requirements
-------------
+## What the role does
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Validates host platform (Debian-family, Rock 4B model check by default)
+- Removes KDE plus desktop-related packages when enabled
+- Stops/disables common display manager services
+- Removes default users (`radxa`, `rock`) when enabled
+- Disables HDMI by appending `video=HDMI-A-1:d` to boot `extraargs`
+- Reboots when required changes are applied
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- `ansible-core >= 2.14`
+- Debian-family target host
 
-Dependencies
-------------
+## Role variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+User-tunable defaults are in `defaults/main.yml`. Internal constants are in `vars/main.yml`.
 
-Example Playbook
-----------------
+- `rock_4b_remove_kde_desktop` (bool, default: `true`)
+- `rock_4b_remove_radxa_user` (bool, default: `true`)
+- `rock_4b_remove_rock_user` (bool, default: `true`)
+- `rock_4b_disable_hdmi` (bool, default: `true`)
+- `rock_4b_reboot_if_required` (bool, default: `true`)
+- `rock_4b_extra_desktop_packages` (additional package names to purge)
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## Example playbook
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+```yaml
+- hosts: rock4b
+  become: true
+  roles:
+    - role: enricocirignaco.radxa.rock_4b
+      vars:
+        rock_4b_remove_kde_desktop: true
+        rock_4b_extra_desktop_packages:
+          - firefox-esr
+```

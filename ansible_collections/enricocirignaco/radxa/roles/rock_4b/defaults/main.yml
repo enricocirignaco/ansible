@@ -1,3 +1,9 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for rock_4b
+rock_4b_remove_kde_desktop: true
+rock_4b_remove_radxa_user: true
+rock_4b_remove_rock_user: true
+rock_4b_disable_hdmi: true
+rock_4b_reboot_if_required: true
+rock_4b_extra_desktop_packages: []
