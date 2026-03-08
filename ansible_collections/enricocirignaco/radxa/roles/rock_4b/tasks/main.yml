@@ -64,7 +64,6 @@
     - sddm.service
     - lightdm.service
     - gdm.service
-    - gdm3.service
     - lxdm.service
   become: true
   register: rock_4b_display_manager_result
