@@ -41,6 +41,20 @@
     - task-kde-desktop
     - task-desktop
     - kde-standard
+    - plasma-desktop
+    - plasma-workspace
+    - plasma-workspace-wayland
+    - kwin-x11
+    - kwin-wayland
+    - kded5
+    - kscreen
+    - kdeconnect
+    - bluedevil
+    - yakuake
+    - khelpcenter
+    - kfind
+    - polkit-kde-agent-1
+    - xdg-desktop-portal-kde
   become: true
   when: rock_4b_remove_kde_desktop | bool
 
