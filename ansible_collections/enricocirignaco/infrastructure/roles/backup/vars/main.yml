@@ -1,5 +1,5 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # vars file for roles/backup
-backup_smb_mount_opts: "credentials={{ backup_smb_creds_file }},uid={{ backup_smb_uid }},gid={{ backup_smb_gid }},vers=3.0,_netdev"
+backup_smb_mount_opts: "credentials={{ backup_smb_creds_file }},uid={{ backup_smb_uid }},gid={{ backup_smb_gid }},vers=3.0,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=60s"
 backup_snapshot_log_path: "{{ backup_snapshot_script_path | dirname }}/backup-snapshot.log"
