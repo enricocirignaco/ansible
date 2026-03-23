@@ -11,11 +11,15 @@
     state: present
     update_cache: yes
   become: true
+  tags: [backup, rpi-clone]
+
 
 - name: Check if rpi-clone is already installed
   ansible.builtin.stat:
     path: "{{ backup_rpi_clone_path }}"
   register: rpi_clone_bin
+  tags: [backup, rpi-clone]
+
 
 - name: Clone rpi-clone repo
   ansible.builtin.git:
@@ -23,6 +27,8 @@
     dest: /tmp/rpi-clone
     version: HEAD
   when: not rpi_clone_bin.stat.exists
+  tags: [backup, rpi-clone]
+
 
 - name: Install rpi-clone binary
   ansible.builtin.copy:
@@ -34,6 +40,8 @@
     remote_src: yes
   become: true
   when: not rpi_clone_bin.stat.exists
+  tags: [backup, rpi-clone]
+
 
 # Setup automated rpi-clone backup
 - name: Deploy rpi-clone runner script
