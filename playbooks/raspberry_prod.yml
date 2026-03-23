@@ -11,7 +11,16 @@
     - enricocirignaco.infrastructure.debian_network
     - enricocirignaco.infrastructure.docker
     - enricocirignaco.infrastructure.komodo
-    - enricocirignaco.infrastructure.backup
+    - role: enricocirignaco.infrastructure.backup
+      vars:
+        backup_smb_share: "192.168.1.100/backup"
+        backup_smb_mountpoint: "/mnt/backup"
+        backup_rpi_clone_enabled: true
+        backup_rpi_clone_args: "-u -m /boot/firmware mmcblk0"
+        backup_rpi_clone_cron_hour: "3"
+        backup_rpi_clone_cron_minute: "00"
+        backup_rpi_clone_ntfy_url: "https://ntfy.casa/rpi-clone"
+
   vars:
     debian_update_mode: "full"
     common_admin_groups:
@@ -50,7 +59,6 @@
     komodo_core_version: "1.19.5"
     komodo_periphery_version: "1.19.5"
     komodo_host_url: "komodo.casa"
-    backup_smb_share: "192.168.1.100/backup"
 
     ansible_user: "admin"
   vars_files:

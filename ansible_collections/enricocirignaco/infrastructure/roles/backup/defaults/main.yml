@@ -7,16 +7,16 @@
 # backup_smb_username:
 # backup_smb_password:
 
-backup_smb_mountpoint: "/mnt/backup"
+backup_smb_mountpoint: ""
 backup_smb_creds_file: "/root/.smb/credentials"
 backup_smb_uid: 1000
 backup_smb_gid: 1000
 
 backup_rpi_clone_enabled: false
 backup_rpi_clone_path: "/usr/local/sbin/rpi-clone"
-backup_rpi_clone_args: "-u -m /boot/firmware mmcblk0"
+backup_rpi_clone_args: ""
 backup_rpi_clone_cron_script_path: "/usr/local/sbin/rpi_clone_cron.sh"
-backup_rpi_clone_cron_hour: "3"
+backup_rpi_clone_cron_hour: "00"
 backup_rpi_clone_cron_minute: "00"
 backup_rpi_clone_log_file: "/var/log/rpi-clone_cron.log"
-backup_rpi_clone_ntfy_url: "https://ntfy.casa/rpi-clone"
+backup_rpi_clone_ntfy_url: ""

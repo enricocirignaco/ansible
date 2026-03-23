@@ -26,10 +26,11 @@ if [[ ${rc} -eq 0 ]]; then
 else
   echo "[$(timestamp)] rpi-clone failed with exit code ${rc}" >> "${LOG_FILE}"
   if [[ -n "${NTFY_URL}" ]]; then
+    ERROR_OUTPUT="${OUTPUT: -2000}"
     curl -fsS -m 15 -H "Title: rpi-clone backup error" -H "X-Priority: default" -d "rpi-clone backup failed on $(hostname), exit code ${rc}
 
 Output:
-${OUTPUT}" "${NTFY_URL}" >/dev/null || true
+${ERROR_OUTPUT}" "${NTFY_URL}" >/dev/null || true
   fi
 fi
 
