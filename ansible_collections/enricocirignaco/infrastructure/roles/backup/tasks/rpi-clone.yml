@@ -3,7 +3,7 @@
 # tasks file for roles/backup
 
 # Download and install rpi-clone
-- name: Ensure git is installed
+- name: Ensure git and curl are installed
   ansible.builtin.apt:
     name:
       - git
