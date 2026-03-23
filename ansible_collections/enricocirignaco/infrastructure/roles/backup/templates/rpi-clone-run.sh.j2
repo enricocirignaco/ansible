@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -u
+
+LOG_FILE="{{ backup_rpi_clone_log_file }}"
+RPI_CLONE_BIN="{{ backup_rpi_clone_path }}"
+RPI_CLONE_ARGS="{{ backup_rpi_clone_args }}"
+NTFY_URL="{{ backup_rpi_clone_ntfy_url }}"
+OUTPUT=""
+
+timestamp() {
+  date '+%Y-%m-%d %H:%M:%S'
+}
+
+echo "[$(timestamp)] Starting rpi-clone backup" >> "${LOG_FILE}"
+OUTPUT="$(${RPI_CLONE_BIN} ${RPI_CLONE_ARGS} 2>&1)"
+
+
+rc=$?
+printf '%s\n' "${OUTPUT}" >> "${LOG_FILE}"
+
+if [[ ${rc} -eq 0 ]]; then
+  echo "[$(timestamp)] rpi-clone completed successfully" >> "${LOG_FILE}"
+  if [[ -n "${NTFY_URL}" ]]; then
+    curl -fsS -m 15 -H "Title: rpi-clone backup success" -H "X-Priority: low" -d "rpi-clone backup completed successfully on $(hostname)" "${NTFY_URL}" >/dev/null || true
+  fi
+else
+  echo "[$(timestamp)] rpi-clone failed with exit code ${rc}" >> "${LOG_FILE}"
+  if [[ -n "${NTFY_URL}" ]]; then
+    curl -fsS -m 15 -H "Title: rpi-clone backup error" -H "X-Priority: default" -d "rpi-clone backup failed on $(hostname), exit code ${rc}
+
+Output:
+${OUTPUT}" "${NTFY_URL}" >/dev/null || true
+  fi
+fi
+
+exit ${rc}

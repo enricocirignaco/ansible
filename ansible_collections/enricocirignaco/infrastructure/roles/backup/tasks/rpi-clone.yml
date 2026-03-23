@@ -1,0 +1,58 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/backup
+
+# Download and install rpi-clone
+- name: Ensure git is installed
+  ansible.builtin.apt:
+    name:
+      - git
+      - curl
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Check if rpi-clone is already installed
+  ansible.builtin.stat:
+    path: "{{ backup_rpi_clone_path }}"
+  register: rpi_clone_bin
+
+- name: Clone rpi-clone repo
+  ansible.builtin.git:
+    repo: "https://github.com/geerlingguy/rpi-clone.git"
+    dest: /tmp/rpi-clone
+    version: HEAD
+  when: not rpi_clone_bin.stat.exists
+
+- name: Install rpi-clone binary
+  ansible.builtin.copy:
+    src: /tmp/rpi-clone/rpi-clone
+    dest: "{{ backup_rpi_clone_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    remote_src: yes
+  become: true
+  when: not rpi_clone_bin.stat.exists
+
+# Setup automated rpi-clone backup
+- name: Deploy rpi-clone runner script
+  ansible.builtin.template:
+    src: rpi-clone-run.sh.j2
+    dest: "{{ backup_rpi_clone_cron_script_path }}"
+    owner: root
+    group: root
+    mode: "0750"
+  become: true
+  tags: [backup, rpi-clone]
+
+- name: Schedule daily rpi-clone backup
+  ansible.builtin.cron:
+    name: "Automated rpi-clone backup"
+    user: "root"
+    minute: "{{ backup_rpi_clone_cron_minute }}"
+    hour: "{{ backup_rpi_clone_cron_hour }}"
+    job: "{{ backup_rpi_clone_cron_script_path }}"
+    state: present
+  become: true
+  tags: [backup, rpi-clone, cron]

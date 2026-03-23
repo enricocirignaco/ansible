@@ -12,14 +12,11 @@ backup_smb_creds_file: "/root/.smb/credentials"
 backup_smb_uid: 1000
 backup_smb_gid: 1000
 
-# snapshot script configuration
-backup_snapshot_script_path: /usr/local/sbin/backup-snapshot.sh
-backup_snapshot_source: /
-backup_snapshot_local_path: /.snapshots
-backup_snapshot_remote_path: "{{ backup_smb_mountpoint }}/{{ hostname | default(inventory_hostname) }}/snapshots"
-backup_snapshot_retention: 3
-
-# cron configuration
-backup_snapshot_cron_minute: "0"
-backup_snapshot_cron_hour: "2"
-backup_snapshot_cron_user: root
+backup_rpi_clone_enabled: false
+backup_rpi_clone_path: "/usr/local/sbin/rpi-clone"
+backup_rpi_clone_args: "-u -m /boot/firmware mmcblk0"
+backup_rpi_clone_cron_script_path: "/usr/local/sbin/rpi_clone_cron.sh"
+backup_rpi_clone_cron_hour: "3"
+backup_rpi_clone_cron_minute: "00"
+backup_rpi_clone_log_file: "/var/log/rpi-clone_cron.log"
+backup_rpi_clone_ntfy_url: "https://ntfy.casa/rpi-clone"
