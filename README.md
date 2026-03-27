@@ -173,6 +173,15 @@ Create a new role within the collection:
 ```bash
 ansible-galaxy role init --init-path ansible_collections/enricocirignaco/mycollection/roles myrole
 ```
+
+## Collections
+
+This repository currently publishes multiple Ansible collections:
+
+- `enricocirignaco.infrastructure`: Debian and homelab infrastructure automation roles.
+- `enricocirignaco.raspberry`: Raspberry Pi specific provisioning and host configuration roles.
+- `enricocirignaco.radxa`: Radxa board provisioning and baseline configuration roles.
+
 ---
 ## Roles
 
