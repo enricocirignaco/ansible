@@ -1,14 +1,16 @@
 ---
-# ansible-playbook playbooks/bootstrap.yaml --ask-pass --ask-become-pass
+# ansible-playbook playbooks/bootstrap.yaml -i "srvprod02.local," --ask-pass --ask-become-pass
 - name: Bootstrap Debian-based systems for Ansible management
-  hosts: bootstrap
-  become: true # sudo
+  hosts: all
+  become: true
   gather_facts: false
   roles:
-    - role: debian_bootstrap
-      vars:
-        debian_bootstrap_ansible_user: ansible
-        debian_bootstrap_ansible_groups: ["sudo"]
-        debian_bootstrap_enable_nopasswd_sudo: true
-        debian_bootstrap_admin_pubkeys:
-          - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIX9uiZ946azTap0/E+3ABElvzhCrdXkMQit8USiEWZI ansible"
+    - enricocirignaco.infrastructure.debian_bootstrap
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_user: admin
+    debian_bootstrap_ansible_user: ansible
+    debian_bootstrap_ansible_groups: ["sudo"]
+    debian_bootstrap_enable_nopasswd_sudo: true
+    debian_bootstrap_admin_pubkeys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIX9uiZ946azTap0/E+3ABElvzhCrdXkMQit8USiEWZI ansible"
