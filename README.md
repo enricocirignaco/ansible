@@ -173,6 +173,10 @@ Create a new role within the collection:
 ```bash
 ansible-galaxy role init --init-path ansible_collections/enricocirignaco/mycollection/roles myrole
 ```
+Install dependencies from requirements.yml:
+```bash
+ansible-galaxy install -r requirements.yml
+```
 
 ## Collections
 

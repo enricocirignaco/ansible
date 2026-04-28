@@ -1,0 +1,57 @@
+---
+debian_update_mode: "full"
+common_admin_groups:
+  - adm
+  - dialout
+  - sudo
+  - plugdev
+  - netdev
+  - docker
+common_install_tailscale: true
+common_admin_authorized_keys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICHvfORDLKCBFhwwviIAY2RtARl3LclLIEVE1r7JCVMl"
+common_hostname: "srvprod01"
+raspberry_expand_rootfs: false
+raspberry_automount_data_partition: true
+raspberry_data_partition_device: "/dev/nvme0n1p3"
+raspberry_data_partition_mountpoint: "/mnt/data"
+raspberry_data_partition_fstype: "ext4"
+debian_hardening_disable_services: ["bluetooth"]
+debian_hardening_ssh_allow_groups: ["admin", "sudo"]
+debian_hardening_ssh_auth_mode: "keys_only"
+debian_hardening_ssh_permit_root_login: "no"
+debian_hardening_ssh_max_auth_tries: 3
+debian_hardening_ssh_login_grace_time: "30s"
+debian_hardening_ssh_client_alive_interval: 300
+debian_hardening_ssh_client_alive_count_max: 2
+debian_hardening_enable_persistent_logs: true
+debian_network_interface: "eth0"
+debian_network_method_v4: "dhcp"
+docker_data_mountpoint: /mnt/data
+docker_data_root: /mnt/data/docker-data
+docker_containerd_root: /mnt/data/docker-data/containerd
+komodo_deployment_directory: "/srv/komodo"
+komodo_postgres_version: "17-0.106.0-ferretdb-2.5.0"
+komodo_ferretdb_version: "2.5.0"
+komodo_core_version: "1.19.5"
+komodo_periphery_version: "1.19.5"
+komodo_host_url: "komodo.casa"
+
+ansible_user: "admin"
+backup_smb_share: "192.168.1.100/backup"
+backup_smb_mountpoint: "/mnt/backup"
+backup_rpi_clone_enabled: true
+backup_rpi_clone_args: "-u -m /boot/firmware mmcblk0"
+backup_rpi_clone_cron_hour: "3"
+backup_rpi_clone_cron_minute: "00"
+backup_rpi_clone_ntfy_url: "https://ntfy.casa/rpi-clone"
+
+assigned_roles:
+  - enricocirignaco.infrastructure.debian_update
+  - enricocirignaco.infrastructure.common
+  - enricocirignaco.infrastructure.raspberry
+  - enricocirignaco.infrastructure.debian_hardening
+  - enricocirignaco.infrastructure.debian_network
+  - enricocirignaco.infrastructure.docker
+  - enricocirignaco.infrastructure.komodo
+  - enricocirignaco.infrastructure.backup
