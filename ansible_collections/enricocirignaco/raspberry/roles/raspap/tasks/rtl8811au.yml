@@ -1,0 +1,66 @@
+---
+- name: Collect USB device list
+  ansible.builtin.command: lsusb
+  register: raspap_lsusb
+  changed_when: false
+
+- name: Detect RTL8811AU USB adapter presence
+  ansible.builtin.set_fact:
+    raspap_rtl8811au_usb_present: "{{ raspap_lsusb.stdout is regex_search(raspap_rtl8811au_lsusb_pattern, ignorecase=True) }}"
+
+- name: Collect loaded kernel modules
+  ansible.builtin.command: lsmod
+  register: raspap_lsmod
+  changed_when: false
+  when: raspap_rtl8811au_usb_present
+
+- name: Detect RTL8811AU driver module state
+  ansible.builtin.set_fact:
+    raspap_rtl8811au_driver_loaded: "{{ raspap_lsmod.stdout is regex_search(raspap_rtl8811au_module_pattern) }}"
+  when: raspap_rtl8811au_usb_present
+
+- name: Print detection summary
+  ansible.builtin.debug:
+    msg:
+      - "RTL8811AU USB adapter present: {{ raspap_rtl8811au_usb_present }}"
+      - "RTL8811AU driver already loaded: {{ raspap_rtl8811au_driver_loaded | default(false) }}"
+
+- name: Install driver dependencies
+  ansible.builtin.apt:
+    update_cache: true
+    name: "{{ raspap_rtl8811au_packages }}"
+    state: present
+  become: true
+  when:
+    - raspap_rtl8811au_usb_present
+    - not (raspap_rtl8811au_driver_loaded | default(false))
+
+- name: Checkout RTL8811AU driver sources
+  ansible.builtin.git:
+    repo: "{{ raspap_rtl8811au_repo_url }}"
+    dest: "{{ raspap_rtl8811au_repo_dest }}"
+    version: "{{ raspap_rtl8811au_repo_version }}"
+  become: true
+  when:
+    - raspap_rtl8811au_usb_present
+    - not (raspap_rtl8811au_driver_loaded | default(false))
+
+- name: Install RTL8811AU driver
+  ansible.builtin.command:
+    cmd: ./install-driver.sh
+    chdir: "{{ raspap_rtl8811au_repo_dest }}"
+  become: true
+  register: raspap_rtl8811au_install
+  changed_when: true
+  when:
+    - raspap_rtl8811au_usb_present
+    - not (raspap_rtl8811au_driver_loaded | default(false))
+
+- name: Reboot after RTL8811AU driver installation
+  ansible.builtin.reboot:
+    reboot_timeout: "{{ raspap_rtl8811au_reboot_timeout }}"
+  become: true
+  when:
+    - raspap_rtl8811au_reboot_after_install | bool
+    - raspap_rtl8811au_install is defined
+    - raspap_rtl8811au_install is changed

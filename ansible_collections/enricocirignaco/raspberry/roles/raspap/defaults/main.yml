@@ -1,0 +1,27 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for raspap
+
+raspap_install: true
+
+raspap_manage_rtl8811au: true
+
+# Driver install prerequisites.
+raspap_rtl8811au_packages:
+  - dkms
+  - git
+  - build-essential
+  - bc
+
+# Driver source and local checkout path.
+raspap_rtl8811au_repo_url: https://github.com/morrownr/8821au-20210708.git
+raspap_rtl8811au_repo_version: HEAD
+raspap_rtl8811au_repo_dest: /usr/local/src/8821au-20210708
+
+# Detection patterns for TP-Link AC600 / RTL8811AU adapters.
+raspap_rtl8811au_lsusb_pattern: '(RTL8811AU|Realtek.*(8811|8821)AU|TP-Link.*AC600|2357:011e)'
+raspap_rtl8811au_module_pattern: '(^|\s)(88XXau|8812au|8821au)(\s|$)'
+
+# Reboot only when the driver installer has run.
+raspap_rtl8811au_reboot_after_install: true
+raspap_rtl8811au_reboot_timeout: 600
