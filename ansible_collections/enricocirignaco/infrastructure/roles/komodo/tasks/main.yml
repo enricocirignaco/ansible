@@ -27,21 +27,31 @@
 
 - name: Ensure Komodo data directories exist
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ komodo_dir }}"
     state: directory
-    owner: "{{ admin_user }}"
-    group: "{{ admin_user}}"
-    mode: "0750"
+    mode: "0700"
   loop:
     - "{{ KOMODO_BACKUPS_PATH }}"
     - "{{ KOMODO_SYNCS_PATH }}"
     - "{{ PERIPHERY_PATH }}"
     - "{{ CERTIFICATES_PATH }}"
-    - "{{ POSTGRES_DATA_PATH }}"
-    - "{{ FERRETDB_STATE_PATH }}"
   loop_control:
-    label: "{{ item }}"
-  when: item is not none and item | length > 0
+    loop_var: komodo_dir
+    label: "{{ komodo_dir }}"
+
+- name: Create Postgres data directory
+  ansible.builtin.file:
+    path: "{{ POSTGRES_DATA_PATH }}"
+    owner: "999"
+    group: "999"
+    mode: "0700"
+
+- name: Create Ferretdb data directory
+  ansible.builtin.file:
+    path: "{{ FERRETDB_STATE_PATH }}"
+    owner: "1000"
+    group: "1000"
+    mode: "0700"
 
 - name: Copy Komodo docker compose file
   ansible.builtin.copy:
