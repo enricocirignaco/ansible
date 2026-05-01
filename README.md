@@ -177,6 +177,10 @@ Install dependencies from requirements.yml:
 ```bash
 ansible-galaxy install -r requirements.yml
 ```
+Create new ansible vault file:
+```bash
+ansible-vault create group_vars/all/vault.yml
+```
 
 ## Collections
 
