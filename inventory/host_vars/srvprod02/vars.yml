@@ -40,6 +40,6 @@ komodo_core_version: "2.1.2"
 komodo_periphery_version: "2.1.2"
 komodo_host_url: "komodo.sovrana"
 
-backup_smb_share: "192.168.1.100/backup"
+backup_smb_share: "192.168.0.100/backup"
 backup_smb_mountpoint: "/mnt/backup"
 backup_rpi_clone_enabled: false
