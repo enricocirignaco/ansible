@@ -47,11 +47,4 @@ backup_rpi_clone_cron_minute: "00"
 backup_rpi_clone_ntfy_url: "https://ntfy.casa/rpi-clone"
 
 assigned_roles:
-  - enricocirignaco.infrastructure.debian_update
-  - enricocirignaco.infrastructure.common
-  - enricocirignaco.infrastructure.raspberry
-  - enricocirignaco.infrastructure.debian_hardening
-  - enricocirignaco.infrastructure.debian_network
-  - enricocirignaco.infrastructure.docker
   - enricocirignaco.infrastructure.komodo
-  - enricocirignaco.infrastructure.backup

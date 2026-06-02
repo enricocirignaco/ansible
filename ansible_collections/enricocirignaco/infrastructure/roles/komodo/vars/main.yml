@@ -26,4 +26,5 @@ KOMODO_DB_PASSWORD: "{{ komodo_secret_db_password }}"
 KOMODO_PASSKEY: "{{ komodo_secret_passkey }}"
 KOMODO_WEBHOOK_SECRET: "{{ komodo_secret_webhook_secret }}"
 KOMODO_JWT_SECRET: "{{ komodo_secret_jwt_secret }}"
+PERIPHERY_CORE_PUBLIC_KEY: "{{ komodo_secret_periphery_core_public_key }}"
 

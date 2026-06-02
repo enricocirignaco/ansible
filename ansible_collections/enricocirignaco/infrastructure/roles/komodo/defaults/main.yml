@@ -21,5 +21,6 @@ komodo_disable_confirm_dialog: true
 # komodo_secret_passkey
 # komodo_secret_webhook_secret
 # komodo_secret_jwt_secret
+# komodo_secret_periphery_core_public_key
 
 

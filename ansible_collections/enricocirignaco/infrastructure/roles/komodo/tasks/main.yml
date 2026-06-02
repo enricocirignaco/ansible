@@ -16,6 +16,7 @@
       - komodo_secret_passkey is defined and komodo_secret_passkey | length > 0
       - komodo_secret_webhook_secret is defined and komodo_secret_webhook_secret | length > 0
       - komodo_secret_jwt_secret is defined and komodo_secret_jwt_secret | length > 0
+      - komodo_secret_periphery_core_public_key is defined and komodo_secret_periphery_core_public_key | length > 0
     fail_msg: "One or more required Komodo variables are undefined or empty. Set them via inventory or vault before running this role."
     quiet: true
 

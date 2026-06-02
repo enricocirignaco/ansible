@@ -30,6 +30,7 @@ Provide these (preferably via inventory or Ansible Vault):
 - `komodo_secret_passkey`: shared passkey between Core and Periphery.
 - `komodo_secret_webhook_secret`: secret for validating inbound webhooks.
 - `komodo_secret_jwt_secret`: signing key for Komodo JWT tokens.
+- `komodo_secret_periphery_core_public_key`: public key shared by Core and Periphery for secure communication.
 
 The role asserts that each value is defined and non-empty before proceeding.
 
@@ -59,6 +60,8 @@ komodo_secret_passkey: !vault |
 komodo_secret_webhook_secret: !vault |
   $ANSIBLE_VAULT;1.1;AES256...
 komodo_secret_jwt_secret: !vault |
+  $ANSIBLE_VAULT;1.1;AES256...
+komodo_secret_periphery_core_public_key: !vault |
   $ANSIBLE_VAULT;1.1;AES256...
 ```
 
