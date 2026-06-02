@@ -33,8 +33,8 @@ docker_containerd_root: /mnt/data/docker-data/containerd
 komodo_deployment_directory: "/srv/komodo"
 komodo_postgres_version: "17-0.106.0-ferretdb-2.5.0"
 komodo_ferretdb_version: "2.5.0"
-komodo_core_version: "1.19.5"
-komodo_periphery_version: "1.19.5"
+komodo_core_version: "2.2.0"
+komodo_periphery_version: "2.2.0"
 komodo_host_url: "komodo.casa"
 
 ansible_user: "admin"

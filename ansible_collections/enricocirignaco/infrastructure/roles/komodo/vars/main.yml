@@ -16,6 +16,8 @@ PERIPHERY_PATH: "{{ komodo_deployment_directory }}/periphery"
 CERTIFICATES_PATH: "{{ komodo_deployment_directory }}/certificates"
 POSTGRES_DATA_PATH: "{{ komodo_deployment_directory }}/postgres"
 FERRETDB_STATE_PATH: "{{ komodo_deployment_directory }}/ferretdb"
+CORE_KEYS_PATH: "{{ komodo_deployment_directory }}/core_keys"
+PERIPHERY_KEYS_PATH: "{{ komodo_deployment_directory }}/periphery_keys"
 KOMODO_LOCAL_AUTH: "{{ komodo_local_auth }}"
 KOMODO_DISABLE_CONFIRM_DIALOG: "{{ komodo_disable_confirm_dialog }}"
 

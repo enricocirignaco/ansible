@@ -35,6 +35,8 @@
     - "{{ KOMODO_SYNCS_PATH }}"
     - "{{ PERIPHERY_PATH }}"
     - "{{ CERTIFICATES_PATH }}"
+    - "{{ CORE_KEYS_PATH }}"
+    - "{{ PERIPHERY_KEYS_PATH }}"
   loop_control:
     loop_var: komodo_dir
     label: "{{ komodo_dir }}"

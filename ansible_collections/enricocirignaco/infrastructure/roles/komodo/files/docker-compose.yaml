@@ -50,6 +50,7 @@ services:
       - "${KOMODO_BACKUPS_PATH}:/backups"
       - "${KOMODO_SYNCS_PATH}:/syncs"
       - "${CERTIFICATES_PATH}:/usr/local/share/ca-certificates/"
+      - "${CORE_KEYS_PATH}:/config/keys"
     networks:
       - caddy
       - komodo
@@ -65,6 +66,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/proc:/proc"
       - "${PERIPHERY_PATH}:${PERIPHERY_PATH}"
+      - "${PERIPHERY_KEYS_PATH}:/config/keys"
     networks:
       - komodo
 
