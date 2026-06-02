@@ -27,7 +27,6 @@ Provide these (preferably via inventory or Ansible Vault):
 - `komodo_postgres_version`, `komodo_ferretdb_version`, `komodo_core_version`, `komodo_periphery_version`: image tags to deploy.
 - `komodo_host_url`: external URL used by Komodo for OAuth/webhook links. Supply just the hostname; the role ensures the scheme is present and also derives the bare hostname for reverse-proxy labels.
 - `komodo_secret_db_username`, `komodo_secret_db_password`: credentials shared by Postgres, FerretDB, and Komodo Core.
-- `komodo_secret_passkey`: shared passkey between Core and Periphery.
 - `komodo_secret_webhook_secret`: secret for validating inbound webhooks.
 - `komodo_secret_jwt_secret`: signing key for Komodo JWT tokens.
 - `komodo_secret_periphery_core_public_key`: public key shared by Core and Periphery for secure communication.
@@ -54,8 +53,6 @@ komodo_host_url: "https://komodo.example.com"
 
 komodo_secret_db_username: admin
 komodo_secret_db_password: !vault |
-  $ANSIBLE_VAULT;1.1;AES256...
-komodo_secret_passkey: !vault |
   $ANSIBLE_VAULT;1.1;AES256...
 komodo_secret_webhook_secret: !vault |
   $ANSIBLE_VAULT;1.1;AES256...

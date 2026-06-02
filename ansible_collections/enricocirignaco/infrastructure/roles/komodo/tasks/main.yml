@@ -13,7 +13,6 @@
       - komodo_host_url is defined and komodo_host_url | length > 0
       - komodo_secret_db_username is defined and komodo_secret_db_username | length > 0
       - komodo_secret_db_password is defined and komodo_secret_db_password | length > 0
-      - komodo_secret_passkey is defined and komodo_secret_passkey | length > 0
       - komodo_secret_webhook_secret is defined and komodo_secret_webhook_secret | length > 0
       - komodo_secret_jwt_secret is defined and komodo_secret_jwt_secret | length > 0
       - komodo_secret_periphery_core_public_key is defined and komodo_secret_periphery_core_public_key | length > 0
