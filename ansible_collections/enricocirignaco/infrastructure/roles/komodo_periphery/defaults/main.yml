@@ -1,3 +1,15 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # defaults file for komodo_periphery
+# The following variables have no default and should be set (prefer inventory or vault):
+# - komodo_periphery_deployment_directory
+# - komodo_periphery_version
+# - komodo_periphery_core_address
+
+# - komodo_periphery_secret_core_public_key
+# - komodo_periphery_secret_onboarding_key
+
+# Optional variables with defaults
+komodo_periphery_connect_as: "{{ inventory_hostname }}"
+komodo_periphery_disable_terminals: false
+komodo_periphery_disable_container_exec: false
