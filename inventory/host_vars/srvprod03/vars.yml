@@ -7,7 +7,6 @@ assigned_roles:
   - enricocirignaco.infrastructure.debian_network
   - enricocirignaco.infrastructure.docker
   - enricocirignaco.infrastructure.komodo
-  - enricocirignaco.infrastructure.backup
 
 debian_update_mode: "full"
 
@@ -24,6 +23,8 @@ common_admin_authorized_keys:
 common_hostname: "srvprod03"
 
 raspberry_expand_rootfs: false
+raspberry_automount_data_partition: false
+
 
 debian_hardening_disable_services: ["bluetooth"]
 debian_hardening_ssh_allow_groups: ["admin", "sudo"]
@@ -40,4 +41,4 @@ debian_network_method_v4: "dhcp"
 
 komodo_periphery_deployment_directory: "/srv/komodo"
 komodo_periphery_version: "2.2.0"
-komodo_periphery_core_address: "R9ExampleCoreAddress1234567890"
+komodo_periphery_core_address: "192.168.0.104:9120"
