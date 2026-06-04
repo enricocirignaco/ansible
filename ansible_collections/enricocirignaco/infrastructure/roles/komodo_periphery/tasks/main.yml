@@ -5,16 +5,16 @@
 - name: Validate required Komodo variables
   ansible.builtin.assert:
     that:
-      - komodo_deployment_directory is defined and komodo_deployment_directory | length > 0
+      - komodo_periphery_deployment_directory is defined and komodo_periphery_deployment_directory | length > 0
       - komodo_periphery_version is defined and komodo_periphery_version | length > 0
-      - komodo_host_url is defined and komodo_host_url | length > 0
-      - komodo_secret_periphery_core_public_key is defined and komodo_secret_periphery_core_public_key | length > 0
-    fail_msg: "One or more required Komodo variables are undefined or empty. Set them via inventory or vault before running this role."
+      - komodo_periphery_core_address is defined and komodo_periphery_core_address | length > 0
+      - komodo_periphery_secret_core_public_key is defined and komodo_periphery_secret_core_public_key | length > 0
+    fail_msg: "One or more required Komodo Periphery variables are undefined or empty. Set them via inventory or vault before running this role."
     quiet: true
 
-- name: Ensure Komodo compose directory exists
+- name: Ensure Komodo Periphery compose directory exists
   ansible.builtin.file:
-    path: "{{ komodo_deployment_directory }}"
+    path: "{{ komodo_periphery_deployment_directory }}"
     state: directory
     mode: "0755"
 
@@ -33,11 +33,11 @@
 - name: Render Komodo docker compose file
   ansible.builtin.template:
     src: compose.yaml.j2
-    dest: "{{ komodo_deployment_directory }}/compose.yaml"
+    dest: "{{ komodo_periphery_deployment_directory }}/compose.yaml"
     mode: "0600"
 
-- name: Ensure Komodo stack is running
+- name: Ensure Komodo Periphery stack is running
   community.docker.docker_compose_v2:
-    project_src: "{{ komodo_deployment_directory }}"
+    project_src: "{{ komodo_periphery_deployment_directory }}"
     state: present
     pull: always
