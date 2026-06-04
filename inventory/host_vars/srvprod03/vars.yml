@@ -1,0 +1,43 @@
+---
+assigned_roles:
+  - enricocirignaco.infrastructure.debian_update
+  - enricocirignaco.infrastructure.common
+  - enricocirignaco.infrastructure.raspberry
+  - enricocirignaco.infrastructure.debian_hardening
+  - enricocirignaco.infrastructure.debian_network
+  - enricocirignaco.infrastructure.docker
+  - enricocirignaco.infrastructure.komodo
+  - enricocirignaco.infrastructure.backup
+
+debian_update_mode: "full"
+
+common_admin_groups:
+  - adm
+  - dialout
+  - sudo
+  - plugdev
+  - netdev
+  - docker
+common_install_tailscale: false
+common_admin_authorized_keys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICHvfORDLKCBFhwwviIAY2RtARl3LclLIEVE1r7JCVMl"
+common_hostname: "srvprod03"
+
+raspberry_expand_rootfs: false
+
+debian_hardening_disable_services: ["bluetooth"]
+debian_hardening_ssh_allow_groups: ["admin", "sudo"]
+debian_hardening_ssh_auth_mode: "keys_only"
+debian_hardening_ssh_permit_root_login: "no"
+debian_hardening_ssh_max_auth_tries: 3
+debian_hardening_ssh_login_grace_time: "30s"
+debian_hardening_ssh_client_alive_interval: 300
+debian_hardening_ssh_client_alive_count_max: 2
+debian_hardening_enable_persistent_logs: false
+
+debian_network_interface: "eth0"
+debian_network_method_v4: "dhcp"
+
+komodo_periphery_deployment_directory: "/srv/komodo"
+komodo_periphery_version: "2.2.0"
+komodo_periphery_core_address: "R9ExampleCoreAddress1234567890"
