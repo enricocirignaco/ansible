@@ -1,0 +1,35 @@
+
+services:
+  periphery:
+    image: "ghcr.io/moghtech/komodo-periphery:${KOMODO_PERIPHERY_VERSION}"
+    init: true
+    environment:
+    - KOMODO_PERIPHERY_VERSION={{ KOMODO_PERIPHERY_VERSION | tojson }}
+    - PERIPHERY_PATH={{ PERIPHERY_PATH | tojson }}
+    - PERIPHERY_ROOT_DIRECTORY={{ PERIPHERY_PATH | tojson }}
+    - PERIPHERY_KEYS_PATH={{ PERIPHERY_KEYS_PATH | tojson }}
+    - PERIPHERY_CORE_PUBLIC_KEY={{ PERIPHERY_CORE_PUBLIC_KEY | tojson }}
+    - PERIPHERY_CORE_ADDRESS={{ PERIPHERY_CORE_ADDRESS | tojson }}
+    - PERIPHERY_CONNECT_AS={{ PERIPHERY_CONNECT_AS | tojson }}
+    ## Optional. Create a Server Onboarding Key in the Komodo UI.
+    ## This allows Periphery to create a new Server in the UI with the above name,
+    ## and can be ommitted once the Server exists in Komodo.
+    - PERIPHERY_ONBOARDING_KEY={{ PERIPHERY_ONBOARDING_KEY | tojson }}
+    - PERIPHERY_DISABLE_TERMINALS={{ PERIPHERY_DISABLE_TERMINALS | tojson }}
+    - PERIPHERY_DISABLE_CONTAINER_EXEC={{ PERIPHERY_DISABLE_CONTAINER_EXEC | tojson }}
+    ## If the disk size is overreporting, can use one of these to 
+    ## whitelist / blacklist the disks to filter them, whichever is easier.
+    ## Accepts comma separated list of paths.
+    ## Usually whitelisting just /etc/hostname gives correct size for single root disk.
+    - PERIPHERY_INCLUDE_DISK_MOUNTS=/etc/hostname
+    # - PERIPHERY_EXCLUDE_DISK_MOUNTS=/snap,/etc/repos
+    labels:
+      komodo.skip:
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/proc:/proc"
+      - "${PERIPHERY_PATH}:${PERIPHERY_PATH}"
+      - "${PERIPHERY_KEYS_PATH}:/config/keys"
