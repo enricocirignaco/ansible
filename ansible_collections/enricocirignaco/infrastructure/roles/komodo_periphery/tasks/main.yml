@@ -26,6 +26,7 @@
   loop:
     - "{{ PERIPHERY_PATH }}"
     - "{{ PERIPHERY_KEYS_PATH }}"
+    - "{{ CERTIFICATES_PATH }}"
   loop_control:
     loop_var: komodo_dir
     label: "{{ komodo_dir }}"
@@ -36,8 +37,48 @@
     dest: "{{ komodo_periphery_deployment_directory }}/compose.yaml"
     mode: "0600"
 
+
+- name: Discover trusted certificates installed on host
+  ansible.builtin.find:
+    paths: /usr/local/share/ca-certificates
+    patterns: "*.crt"
+    recurse: true
+    file_type: file
+  register: komodo_trusted_certs
+  become: true
+
+- name: Copy trusted certificates into Periphery deployment
+  ansible.builtin.copy:
+    src: "{{ cert.path }}"
+    dest: "{{ CERTIFICATES_PATH }}/{{ cert.path | basename }}"
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: true
+  loop: "{{ komodo_trusted_certs.files }}"
+  loop_control:
+    loop_var: cert
+    label: "{{ cert.path | basename }}"
+  when: komodo_trusted_certs.matched | default(0) > 0
+  become: true
+
 - name: Ensure Komodo Periphery stack is running
   community.docker.docker_compose_v2:
     project_src: "{{ komodo_periphery_deployment_directory }}"
     state: present
     pull: always
+
+- name: Refresh CA certificates inside Komodo core container
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - "--project-directory"
+      - "{{ komodo_deployment_directory }}"
+      - exec
+      - "-T"
+      - core
+      - update-ca-certificates
+  become: true
+  changed_when: true
+  when: komodo_trusted_certs.matched | default(0) > 0
