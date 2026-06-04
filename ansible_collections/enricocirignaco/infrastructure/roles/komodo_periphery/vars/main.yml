@@ -8,8 +8,6 @@ PERIPHERY_VERSION: "{{ komodo_periphery_version }}"
 # derived paths
 PERIPHERY_PATH: "{{ komodo_periphery_deployment_directory }}/periphery"
 PERIPHERY_KEYS_PATH: "{{ komodo_periphery_deployment_directory }}/periphery_keys"
-CERTIFICATES_PATH: "{{ komodo_periphery_deployment_directory }}/certificates"
-
 
 # runtime variables passed into the container
 PERIPHERY_CORE_PUBLIC_KEY: "{{ komodo_periphery_secret_core_public_key }}"
