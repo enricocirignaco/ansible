@@ -10,12 +10,12 @@ services:
       PERIPHERY_CORE_PUBLIC_KEY: {{ PERIPHERY_CORE_PUBLIC_KEY | tojson }}
       PERIPHERY_DISABLE_TERMINALS: {{ PERIPHERY_DISABLE_TERMINALS | tojson }}
       PERIPHERY_DISABLE_CONTAINER_EXEC: {{ PERIPHERY_DISABLE_CONTAINER_EXEC | tojson }}
-    ## If the disk size is overreporting, can use one of these to 
-    ## whitelist / blacklist the disks to filter them, whichever is easier.
-    ## Accepts comma separated list of paths.
-    ## Usually whitelisting just /etc/hostname gives correct size for single root disk.
-    PERIPHERY_INCLUDE_DISK_MOUNTS: /etc/hostname
-    #   PERIPHERY_EXCLUDE_DISK_MOUNTS: /snap,/etc/repos
+      ## If the disk size is overreporting, can use one of these to 
+      ## whitelist / blacklist the disks to filter them, whichever is easier.
+      ## Accepts comma separated list of paths.
+      ## Usually whitelisting just /etc/hostname gives correct size for single root disk.
+      PERIPHERY_INCLUDE_DISK_MOUNTS: /etc/hostname
+      #   PERIPHERY_EXCLUDE_DISK_MOUNTS: /snap,/etc/repos
 
     labels:
       komodo.skip:
