@@ -38,7 +38,7 @@ komodo_periphery_version: "2.2.0"
 komodo_host_url: "komodo.casa"
 
 ansible_user: "admin"
-backup_smb_share: "192.168.0.100/backup"
+backup_smb_share: "home-nas/backup"
 backup_smb_mountpoint: "/mnt/backup"
 backup_rpi_clone_enabled: true
 backup_rpi_clone_args: "-u -m /boot/firmware mmcblk0"
