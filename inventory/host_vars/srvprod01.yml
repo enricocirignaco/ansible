@@ -27,6 +27,7 @@ debian_hardening_ssh_client_alive_count_max: 2
 debian_hardening_enable_persistent_logs: true
 debian_network_interface: "eth0"
 debian_network_method_v4: "dhcp"
+debian_network_enable_avahi: false
 docker_data_mountpoint: /mnt/data
 docker_data_root: /mnt/data/docker-data
 docker_containerd_root: /mnt/data/docker-data/containerd

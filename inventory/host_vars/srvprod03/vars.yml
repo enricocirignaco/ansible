@@ -38,6 +38,7 @@ debian_hardening_enable_persistent_logs: false
 
 debian_network_interface: "eth0"
 debian_network_method_v4: "dhcp"
+debian_network_enable_avahi: false
 
 komodo_periphery_deployment_directory: "/srv/komodo"
 komodo_periphery_version: "2.2.0"
