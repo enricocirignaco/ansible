@@ -1,0 +1,12 @@
+---
+assigned_roles:
+  - enricocirignaco.infrastructure.debian_bootstrap
+
+gather_facts: false
+ansible_python_interpreter: /usr/bin/python3
+ansible_user: admin
+debian_bootstrap_ansible_user: ansible
+debian_bootstrap_ansible_groups: ["sudo"]
+debian_bootstrap_enable_nopasswd_sudo: false
+debian_bootstrap_admin_pubkeys:
+  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIX9uiZ946azTap0/E+3ABElvzhCrdXkMQit8USiEWZI ansible"
