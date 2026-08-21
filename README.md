@@ -137,10 +137,35 @@ Include the role in a playbook:
     - role: myrole
 ```
 
----
+## Bootstrap new Debian machine for Ansible management
+1. Create vars file
+  ```bash
+  mkdir -p "inventory/host_vars/<host>"
+  touch /inventory/host_vars/<host>/vars.yaml
+  ```
+2. Create bootstrap vars file
+  ```bash
+  touch /inventory/host_vars/<host>/bootstrap-vars.yaml
+  ```
+3. Create host vault
+  ```bash
+  ansible-vault create /inventory/host_vars/<host>/vault.yaml
+  ```
+4. Add host to the [host.ini](inventory/hosts.ini) file
+5. Install dependencies from requirements.yml
+```bash
+ansible-galaxy install -r requirements.yml
+```
+6. Run Bottstrap playbook
+```bash
+ansible-playbook playbooks/site.yaml \
+-l "<your-host>," \
+-e "@host_vars/<your-host>/bootstrap-vars.yaml" \
+--ask-pass \
+--ask-become-pass
+```
 
-### Common Commands
-
+## Common Commands
 Run a playbook against your inventory:
 ```bash
 ansible-playbook -i inventories/prod/hosts.ini playbooks/site.yml
