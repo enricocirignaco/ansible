@@ -1,7 +1,9 @@
 ---
-- name: Day-2 baseline — test common role
-  hosts: managed
-  become: true
+- name: Site playbook to run arbitrary roles
+  hosts: all
   gather_facts: true
-  roles:
-    - common
+  tasks:
+    - name: Include roles defined in the host variable "assigned_roles"
+      include_role:
+        name: "{{ item }}"
+      loop: "{{ assigned_roles | default([]) }}"
